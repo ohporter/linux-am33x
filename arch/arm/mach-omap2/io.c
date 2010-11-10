@@ -375,7 +375,9 @@ void __init omap2_init_common_infrastructure(void)
 		omap2430_hwmod_init();
 	} else if (cpu_is_omap34xx()) {
 		omap3xxx_powerdomains_init();
+		ti816x_powerdomains_init();
 		omap3xxx_clockdomains_init();
+		ti816x_clockdomains_init();
 		omap3xxx_hwmod_init();
 	} else if (cpu_is_omap44xx()) {
 		omap44xx_powerdomains_init();

@@ -170,3 +170,27 @@ static struct clockdomain default_usb_816x_clkdm = {
 	.flags		= CLKDM_CAN_HWSUP_SWSUP,
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_TI816X),
 };
+
+static struct clockdomain *clockdomains_ti816x[] __initdata = {
+	&alwon_mpu_816x_clkdm,
+	&alwon_l3_slow_816x_clkdm,
+	&alwon_l3_fast_816x_clkdm,
+	&alwon_ethernet_816x_clkdm,
+	&mmu_816x_clkdm,
+	&mmu_cfg_816x_clkdm,
+	&active_gem_816x_clkdm,
+	&hdvicp0_816x_clkdm,
+	&hdvicp1_816x_clkdm,
+	&hdvicp2_816x_clkdm,
+	&sgx_816x_clkdm,
+	&default_l3_med_816x_clkdm,
+	&default_ducati_816x_clkdm,
+	&default_pcie_816x_clkdm,
+	&default_usb_816x_clkdm,
+	NULL,
+};
+
+void __init ti816x_clockdomains_init(void)
+{
+	clkdm_init(clockdomains_ti816x, NULL, &omap3_clkdm_operations);
+}

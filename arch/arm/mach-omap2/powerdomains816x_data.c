@@ -66,3 +66,19 @@ static struct powerdomain sgx_816x_pwrdm = {
 	.omap_chip	  = OMAP_CHIP_INIT(CHIP_IS_TI816X),
 	.pwrsts		  = PWRSTS_OFF_ON,
 };
+
+static struct powerdomain *powerdomains_ti816x[] __initdata = {
+	&alwon_816x_pwrdm,
+	&active_816x_pwrdm,
+	&default_816x_pwrdm,
+	&hdvicp0_816x_pwrdm,
+	&hdvicp1_816x_pwrdm,
+	&hdvicp2_816x_pwrdm,
+	&sgx_816x_pwrdm,
+	NULL
+};
+
+void __init ti816x_powerdomains_init(void)
+{
+	pwrdm_init(powerdomains_ti816x, &ti816x_pwrdm_operations);
+}

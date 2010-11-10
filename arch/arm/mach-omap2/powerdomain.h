@@ -212,10 +212,12 @@ bool pwrdm_can_ever_lose_context(struct powerdomain *pwrdm);
 
 extern void omap2xxx_powerdomains_init(void);
 extern void omap3xxx_powerdomains_init(void);
+extern void ti816x_powerdomains_init(void);
 extern void omap44xx_powerdomains_init(void);
 
 extern struct pwrdm_ops omap2_pwrdm_operations;
 extern struct pwrdm_ops omap3_pwrdm_operations;
+extern struct pwrdm_ops ti816x_pwrdm_operations;
 extern struct pwrdm_ops omap4_pwrdm_operations;
 
 /* Common Internal functions used across OMAP rev's */

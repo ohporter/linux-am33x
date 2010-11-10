@@ -229,6 +229,10 @@
 #define OMAP3430_PRM_IRQSTATUS_IVA2			0x00f8
 #define OMAP3430_PRM_IRQENABLE_IVA2			0x00fc
 
+/* TI816X specific register offsets */
+#define TI816X_PM_PWSTCTRL				0x0000
+#define TI816X_PM_PWSTST				0x0004
+
 /*
  * TI816X PRM module offsets
  */

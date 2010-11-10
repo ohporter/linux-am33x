@@ -254,10 +254,12 @@ static struct powerdomain dpll5_pwrdm = {
 	.prcm_offs	= PLL_MOD,
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_GE_OMAP3430ES2),
 };
+#endif
 
 /* As powerdomains are added or removed above, this list must also be changed */
 static struct powerdomain *powerdomains_omap3xxx[] __initdata = {
 
+#ifdef CONFIG_ARCH_OMAP3
 	&wkup_omap2_pwrdm,
 	&gfx_omap2_pwrdm,
 	&iva2_pwrdm,
@@ -276,10 +278,10 @@ static struct powerdomain *powerdomains_omap3xxx[] __initdata = {
 	&dpll3_pwrdm,
 	&dpll4_pwrdm,
 	&dpll5_pwrdm,
+
 #endif
 	NULL
 };
-
 
 void __init omap3xxx_powerdomains_init(void)
 {

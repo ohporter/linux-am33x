@@ -854,6 +854,7 @@ static struct clockdomain *clockdomains_omap2[] __initdata = {
 	&dpll4_clkdm,
 	&dpll5_clkdm,
 #endif
+
 	NULL,
 };
 
