@@ -157,6 +157,32 @@ static const int omap4_dm_timer_count = ARRAY_SIZE(omap4_dm_timers);
 #define omap4_dm_source_clocks		NULL
 #endif	/* CONFIG_ARCH_OMAP4 */
 
+#ifdef CONFIG_SOC_OMAPTI81XX
+static struct omap_dm_timer ti816x_dm_timers[] = {
+	{ .phys_base = 0x4802E000, .irq = 67 },
+	{ .phys_base = 0x48040000, .irq = 68 },
+	{ .phys_base = 0x48042000, .irq = 69 },
+	{ .phys_base = 0x48044000, .irq = 70 },
+	{ .phys_base = 0x48046000, .irq = 71 },
+	{ .phys_base = 0x48048000, .irq = 72 },
+	{ .phys_base = 0x4804A000, .irq = 73 },
+};
+static const char *ti816x_dm_source_names[] __initdata = {
+	"osc_sys_ck",
+	"sysclk18_ck",
+	"tclkin_ck",
+	NULL
+};
+static struct clk *ti816x_dm_source_clocks[3];
+static const int ti816x_dm_timer_count = ARRAY_SIZE(ti816x_dm_timers);
+
+#else
+#define ti816x_dm_timers		NULL
+#define ti816x_dm_timer_count		0
+#define ti816x_dm_source_names		NULL
+#define ti816x_dm_source_clocks		NULL
+#endif	/* CONFIG_SOC_OMAPTI81XX */
+
 static struct omap_dm_timer *dm_timers;
 static const char **dm_source_names;
 static struct clk **dm_source_clocks;
@@ -185,12 +211,24 @@ static void omap_dm_timer_write_reg(struct omap_dm_timer *timer, u32 reg,
 	__omap_dm_timer_write(timer->io_base, reg, value, timer->posted);
 }
 
+static inline int omap_dm_timer_is_reset_done(struct omap_dm_timer *timer)
+{
+	/* TI816X timers do not have SYS_STAT register */
+	if (!cpu_is_ti816x())
+		return ((omap_dm_timer_read_reg(timer,
+					OMAP_TIMER_SYS_STAT_REG) & 1) == 1);
+	else
+		return ((omap_dm_timer_read_reg(timer,
+					OMAP_TIMER_OCP_CFG_REG) & 1) == 0);
+}
+
 static void omap_dm_timer_wait_for_reset(struct omap_dm_timer *timer)
 {
 	int c;
 
 	c = 0;
-	while (!(omap_dm_timer_read_reg(timer, OMAP_TIMER_SYS_STAT_REG) & 1)) {
+
+	while (!omap_dm_timer_is_reset_done(timer)) {
 		c++;
 		if (c > 100000) {
 			printk(KERN_ERR "Timer failed to reset\n");
@@ -591,6 +629,11 @@ static int __init omap_dm_timer_init(void)
 		dm_timer_count = omap2_dm_timer_count;
 		dm_source_names = omap2_dm_source_names;
 		dm_source_clocks = omap2_dm_source_clocks;
+	} else if (cpu_is_ti816x()) {
+		dm_timers = ti816x_dm_timers;
+		dm_timer_count = ti816x_dm_timer_count;
+		dm_source_names = ti816x_dm_source_names;
+		dm_source_clocks = ti816x_dm_source_clocks;
 	} else if (cpu_is_omap34xx()) {
 		dm_timers = omap3_dm_timers;
 		dm_timer_count = omap3_dm_timer_count;
