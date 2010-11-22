@@ -355,6 +355,7 @@ struct musb {
 
 	struct device		*controller;
 	void __iomem		*ctrl_base;
+	phys_addr_t		ctrl_phys_base;
 	void __iomem		*mregs;
 
 	/*Fixme: the three fields below are only used by tusb*/
