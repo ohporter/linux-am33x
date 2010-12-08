@@ -1880,6 +1880,7 @@ musb_init_controller(struct device *dev, int nIrq, void __iomem *ctrl,
 	int			status;
 	struct musb		*musb;
 	struct musb_hdrc_platform_data *plat = dev->platform_data;
+	struct platform_device *pdev = to_platform_device(dev);
 
 	/* The driver might handle more features than the board; OK.
 	 * Fail when the board needs a feature that's not enabled.
@@ -1908,6 +1909,8 @@ musb_init_controller(struct device *dev, int nIrq, void __iomem *ctrl,
 	musb->board_set_power = plat->set_power;
 	musb->min_power = plat->min_power;
 	musb->ops = plat->platform_ops;
+	musb->id = pdev->id;
+
 	if (fifo_mode == -1)
 		fifo_mode = musb->ops->fifo_mode;
 

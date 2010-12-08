@@ -457,6 +457,8 @@ struct musb {
 #ifdef MUSB_CONFIG_PROC_FS
 	struct proc_dir_entry *proc_entry;
 #endif
+	/* id for multiple musb instances */
+	u8			id;
 };
 
 static inline struct musb *gadget_to_musb(struct usb_gadget *g)
