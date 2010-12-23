@@ -30,39 +30,65 @@ config USB_MUSB_HDRC
 	  To compile this driver as a module, choose M here; the
 	  module will be called "musb-hdrc".
 
-choice
-	prompt "Platform Glue Layer"
+comment "Platform Glue Layer"
 	depends on USB_MUSB_HDRC
 
-config USB_MUSB_DAVINCI
+config USB_MUSB_DAVINCI_GLUE
+	select USB_MUSB_DAVINCI
 	tristate "DaVinci"
-	depends on ARCH_DAVINCI_DMx
+	depends on ARCH_DAVINCI_DMx && USB_MUSB_HDRC
 
-config USB_MUSB_DA8XX
+config USB_MUSB_DA8XX_GLUE
+	select USB_MUSB_DA8XX
 	tristate "DA8xx/OMAP-L1x"
-	depends on ARCH_DAVINCI_DA8XX
+	depends on ARCH_DAVINCI_DA8XX && USB_MUSB_HDRC
 
-config USB_MUSB_TUSB6010
+config USB_MUSB_TUSB6010_GLUE
+	select USB_MUSB_TUSB6010
 	tristate "TUSB6010"
-	depends on ARCH_OMAP
+	depends on ARCH_OMAP && USB_MUSB_HDRC
 
-config USB_MUSB_OMAP2PLUS
+config USB_MUSB_OMAP2PLUS_GLUE
+	select USB_MUSB_OMAP2PLUS
 	tristate "OMAP2430 and onwards"
-	depends on ARCH_OMAP2PLUS
+	depends on ARCH_OMAP2PLUS && USB_MUSB_HDRC
 
-config USB_MUSB_AM35X
+config USB_MUSB_AM35X_GLUE
+	select USB_MUSB_AM35X
 	tristate "AM35x"
-	depends on ARCH_OMAP
+	depends on ARCH_OMAP && USB_MUSB_HDRC
 
-config USB_MUSB_BLACKFIN
+config USB_MUSB_BLACKFIN_GLUE
+	select USB_MUSB_BLACKFIN
 	tristate "Blackfin"
-	depends on (BF54x && !BF544) || (BF52x && ! BF522 && !BF523)
+	depends on ((BF54x && !BF544) || (BF52x && ! BF522 && !BF523)) && USB_MUSB_HDRC
 
-config USB_MUSB_UX500
+config USB_MUSB_UX500_GLUE
+	select USB_MUSB_UX500
 	tristate "U8500 and U5500"
-	depends on (ARCH_U8500 && AB8500_USB) || (ARCH_U5500)
+	depends on ((ARCH_U8500 && AB8500_USB) || ARCH_U5500) && USB_MUSB_HDRC
 
-endchoice
+config USB_MUSB_DAVINCI
+	bool
+	default n
+config USB_MUSB_DA8XX
+	bool
+	default n
+config USB_MUSB_TUSB6010
+	bool
+	default n
+config USB_MUSB_OMAP2PLUS
+	bool
+	default n
+config USB_MUSB_AM35X
+	bool
+	default n
+config USB_MUSB_BLACKFIN
+	bool
+	default n
+config USB_MUSB_UX500
+	bool
+	default n
 
 config MUSB_PIO_ONLY
 	bool 'Disable DMA (always use PIO)'
