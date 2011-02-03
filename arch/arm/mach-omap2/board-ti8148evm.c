@@ -23,6 +23,14 @@
 #include <plat/irqs.h>
 #include <plat/board.h>
 #include <plat/common.h>
+#include <plat/usb.h>
+
+static struct omap_musb_board_data musb_board_data = {
+	.interface_type         = MUSB_INTERFACE_ULPI,
+	.mode           = MUSB_OTG,
+	.power                  = 500,
+	.instances              = 1,
+};
 
 static struct omap_board_config_kernel ti8148_evm_config[] __initdata = {
 };
@@ -38,6 +46,8 @@ static void __init ti8148_evm_init(void)
 	omap_sdrc_init(NULL, NULL);
 	omap_board_config = ti8148_evm_config;
 	omap_board_config_size = ARRAY_SIZE(ti8148_evm_config);
+	/* initialize usb */
+	usb_musb_init(&musb_board_data);
 }
 
 static void __init ti8148_evm_map_io(void)
