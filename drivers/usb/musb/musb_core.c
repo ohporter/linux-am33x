@@ -2222,7 +2222,7 @@ static int __exit musb_remove(struct platform_device *pdev)
 
 #ifdef	CONFIG_PM
 
-static void musb_save_context(struct musb *musb)
+void musb_save_context(struct musb *musb)
 {
 	int i;
 	void __iomem *musb_base = musb->mregs;
@@ -2297,7 +2297,7 @@ static void musb_save_context(struct musb *musb)
 	}
 }
 
-static void musb_restore_context(struct musb *musb)
+void musb_restore_context(struct musb *musb)
 {
 	int i;
 	void __iomem *musb_base = musb->mregs;
@@ -2394,19 +2394,15 @@ static int musb_suspend(struct device *dev)
 		 */
 	}
 
-	musb_save_context(musb);
-
 	spin_unlock_irqrestore(&musb->lock, flags);
 	return 0;
 }
 
 static int musb_resume_noirq(struct device *dev)
 {
-	struct musb	*musb = dev_to_musb(dev);
-
-	musb_restore_context(musb);
-
-	/* for static cmos like DaVinci, register values were preserved
+	/* clocks are getting enabled in glue layer and thus restore
+	 * would get called from glue layers.
+	 * for static cmos like DaVinci, register values were preserved
 	 * unless for some reason the whole soc powered down or the USB
 	 * module got reset through the PSC (vs just being disabled).
 	 */
