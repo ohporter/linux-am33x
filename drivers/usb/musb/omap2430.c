@@ -506,6 +506,7 @@ static int omap2430_runtime_suspend(struct device *dev)
 
 	omap2430_low_level_exit(musb);
 	otg_set_suspend(musb->xceiv, 1);
+	musb_save_context(musb);
 
 	return 0;
 }
@@ -516,6 +517,7 @@ static int omap2430_runtime_resume(struct device *dev)
 	struct musb			*musb = glue_to_musb(glue);
 
 	omap2430_low_level_init(musb);
+	musb_restore_context(musb);
 	otg_set_suspend(musb->xceiv, 0);
 
 	return 0;
