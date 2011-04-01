@@ -58,6 +58,9 @@ static void musb_do_idle(unsigned long _musb)
 
 	switch (musb->xceiv->state) {
 	case OTG_STATE_A_WAIT_BCON:
+		devctl = musb_readb(musb->mregs, MUSB_DEVCTL);
+		devctl &= ~MUSB_DEVCTL_SESSION;
+		musb_writeb(musb->mregs, MUSB_DEVCTL, devctl);
 
 		devctl = musb_readb(musb->mregs, MUSB_DEVCTL);
 		if (devctl & MUSB_DEVCTL_BDEVICE) {
