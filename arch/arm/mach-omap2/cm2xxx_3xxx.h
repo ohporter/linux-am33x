@@ -122,6 +122,7 @@ extern void omap3xxx_cm_clkdm_disable_hwsup(s16 module, u32 mask);
 extern void omap3xxx_cm_clkdm_force_sleep(s16 module, u32 mask);
 extern void omap3xxx_cm_clkdm_force_wakeup(s16 module, u32 mask);
 
+extern int ti816x_cm_wait_module_ready(u16 inst, u16 clkctrl_reg);
 extern void ti816x_cm_clkdm_enable_hwsup(s16 inst, u16 clkdm, u32 mask);
 extern void ti816x_cm_clkdm_disable_hwsup(s16 inst, u16 clkdm, u32 mask);
 extern void ti816x_cm_clkdm_force_sleep(s16 inst, u16 clkdm, u32 mask);

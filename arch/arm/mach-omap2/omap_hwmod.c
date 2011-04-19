@@ -1051,7 +1051,7 @@ static struct omap_hwmod *_lookup(const char *name)
  */
 static int _init_clkdm(struct omap_hwmod *oh)
 {
-	if (cpu_is_omap24xx() || cpu_is_omap34xx())
+	if (cpu_is_omap24xx() || (cpu_is_omap34xx() && !cpu_is_ti816x()))
 		return 0;
 
 	if (!oh->clkdm_name) {
@@ -1134,9 +1134,14 @@ static int _wait_target_ready(struct omap_hwmod *oh)
 	/* XXX check clock enable states */
 
 	if (cpu_is_omap24xx() || cpu_is_omap34xx()) {
-		ret = omap2_cm_wait_module_ready(oh->prcm.omap2.module_offs,
-						 oh->prcm.omap2.idlest_reg_id,
-						 oh->prcm.omap2.idlest_idle_bit);
+		if (cpu_is_ti816x())
+			ret = ti816x_cm_wait_module_ready(oh->clkdm->cm_inst,
+						oh->prcm.omap4.clkctrl_offs);
+		else
+			ret = omap2_cm_wait_module_ready(
+						oh->prcm.omap2.module_offs,
+						oh->prcm.omap2.idlest_reg_id,
+						oh->prcm.omap2.idlest_idle_bit);
 	} else if (cpu_is_omap44xx()) {
 		if (!oh->clkdm)
 			return -EINVAL;
