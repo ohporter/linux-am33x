@@ -154,6 +154,7 @@ void __init usb_musb_init(struct omap_musb_board_data *musb_board_data)
 			musb_config.fifo_mode = 6;
 		}
 
+		board_data->set_phy_power = ti81xx_musb_phy_power;
 		oh_name = "usb_otg_hs";
 		name = "ti81xx-usbss";
 	} else {

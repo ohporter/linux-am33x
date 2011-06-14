@@ -89,7 +89,7 @@ struct omap_musb_board_data {
 	u16	power;
 	unsigned extvbus:1;
 	u8	instances;
-	void	(*set_phy_power)(u8 on);
+	void	(*set_phy_power)(u8 id, u8 on);
 	void	(*clear_irq)(void);
 	void	(*set_mode)(u8 mode);
 	void	(*reset)(void);
@@ -112,9 +112,10 @@ extern int omap4430_phy_suspend(struct device *dev, int suspend);
 #endif
 
 extern void am35x_musb_reset(void);
-extern void am35x_musb_phy_power(u8 on);
+extern void am35x_musb_phy_power(u8 id, u8 on);
 extern void am35x_musb_clear_irq(void);
 extern void am35x_set_mode(u8 musb_mode);
+extern void ti81xx_musb_phy_power(u8 id, u8 on);
 
 /*
  * FIXME correct answer depends on hmc_mode,
@@ -338,5 +339,39 @@ static inline u32 omap1_usb2_init(unsigned nwires, unsigned alt_pingroup)
 #define USB_RX_TDOWN_MASK(n)	(1 << USB_RX_TDOWN_SHIFT(n))
 
 #define USB_CPPI41_NUM_CH	15
+
+/* TI81XX specific definitions */
+#define TI81XX_USBCTRL0				0x0620
+#define TI81XX_USBSTAT0				0x0624
+#define TI81XX_USBCTRL1				0x0628
+#define TI81XX_USBSTAT1				0x062c
+
+/* TI816X PHY controls bits */
+#define	TI816X_USBPHY0_NORMAL_MODE		(1 << 0)
+#define	TI816X_USBPHY1_NORMAL_MODE		(1 << 1)
+#define	TI816X_USBPHY_REFCLK_OSC		(1 << 8)
+
+/* TI814X PHY controls bits */
+#define TI814X_USBPHY_CM_PWRDN		(1 << 0)
+#define TI814X_USBPHY_OTG_PWRDN		(1 << 1)
+#define TI814X_USBPHY_CHGDET_DIS	(1 << 2)
+#define TI814X_USBPHY_CHGDET_RSTRT	(1 << 3)
+#define TI814X_USBPHY_SRCONDM		(1 << 4)
+#define TI814X_USBPHY_SINKONDP		(1 << 5)
+#define TI814X_USBPHY_CHGISINK_EN	(1 << 6)
+#define TI814X_USBPHY_CHGVSRC_EN	(1 << 7)
+#define TI814X_USBPHY_DMPULLUP		(1 << 8)
+#define TI814X_USBPHY_DPPULLUP		(1 << 9)
+#define TI814X_USBPHY_CDET_EXTCTL	(1 << 10)
+#define TI814X_USBPHY_GPIO_MODE		(1 << 12)
+#define TI814X_USBPHY_DPOPBUFCTL	(1 << 13)
+#define TI814X_USBPHY_DMOPBUFCTL	(1 << 14)
+#define TI814X_USBPHY_DPINPUT		(1 << 15)
+#define TI814X_USBPHY_DMINPUT		(1 << 16)
+#define TI814X_USBPHY_DPGPIO_PD		(1 << 17)
+#define TI814X_USBPHY_DMGPIO_PD		(1 << 18)
+#define TI814X_USBPHY_OTGVDET_EN	(1 << 19)
+#define TI814X_USBPHY_OTGSESSEND_EN	(1 << 20)
+#define TI814X_USBPHY_DATA_POLARITY	(1 << 23)
 
 #endif	/* __ASM_ARCH_OMAP_USB_H */

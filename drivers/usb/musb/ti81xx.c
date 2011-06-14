@@ -42,6 +42,7 @@
 struct ti81xx_glue {
 	struct device		*dev;
 	struct platform_device	*musb;
+	struct clk		*phy_clk;
 	struct clk		*clk;
 };
 static u64 musb_dmamask = DMA_BIT_MASK(32);
@@ -390,7 +391,7 @@ static const u32 assigned_queues[] = {	0xffffffff, /* queue 0..31 */
 					0x0fffffff  /* queue 128..155 */
 					};
 
-int __init cppi41_init(struct musb *musb)
+int __devinit cppi41_init(struct musb *musb)
 {
 	struct usb_cppi41_info *cppi_info = &usb_cppi41_info[musb->id];
 	u16 numch, blknum, order;
@@ -494,78 +495,6 @@ int cppi41_enable_sched_rx(void)
 	return 0;
 }
 #endif /* CONFIG_USB_TI_CPPI41_DMA */
-
-/*
- * REVISIT (PM): we should be able to keep the PHY in low power mode most
- * of the time (24 MHZ oscillator and PLL off, etc) by setting POWER.D0
- * and, when in host mode, autosuspending idle root ports... PHYPLLON
- * (overriding SUSPENDM?) then likely needs to stay off.
- */
-
-static inline void phy_on(u8 id)
-{
-	u32 usbphycfg, ctrl_offs;
-	DBG(4, "phy_on..\n");
-
-	/*
-	 * Start the on-chip PHY and its PLL.
-	 */
-	if (cpu_is_ti81xx()) {
-		ctrl_offs = id ? TI81XX_USBCTRL1 : TI81XX_USBCTRL0;
-		usbphycfg = omap_ctrl_readl(ctrl_offs);
-
-		if (cpu_is_ti816x()) {
-			usbphycfg |= (TI816X_USBPHY0_NORMAL_MODE
-					| TI816X_USBPHY1_NORMAL_MODE);
-			usbphycfg &= ~(TI816X_USBPHY_REFCLK_OSC);
-		} else if (cpu_is_ti814x()) {
-			usbphycfg &= ~(TI814X_USBPHY_CM_PWRDN
-				| TI814X_USBPHY_OTG_PWRDN
-				| TI814X_USBPHY_DMPULLUP
-				| TI814X_USBPHY_DPPULLUP
-				| TI814X_USBPHY_DPINPUT
-				| TI814X_USBPHY_DMINPUT
-				| TI814X_USBPHY_DATA_POLARITY);
-			usbphycfg |= (TI814X_USBPHY_SRCONDM
-				| TI814X_USBPHY_SINKONDP
-				| TI814X_USBPHY_CHGISINK_EN
-				| TI814X_USBPHY_CHGVSRC_EN
-				| TI814X_USBPHY_CDET_EXTCTL
-				| TI814X_USBPHY_DPOPBUFCTL
-				| TI814X_USBPHY_DMOPBUFCTL
-				| TI814X_USBPHY_DPGPIO_PD
-				| TI814X_USBPHY_DMGPIO_PD
-				| TI814X_USBPHY_OTGVDET_EN
-				| TI814X_USBPHY_OTGSESSEND_EN);
-		}
-
-		omap_ctrl_writel(usbphycfg, ctrl_offs);
-		DBG(4, "usbphy_ctrl%d=%x\n", id, omap_ctrl_readl(ctrl_offs));
-		DBG(4, "usbphy_stat%d=%x\n", id, omap_ctrl_readl(id ?
-			TI81XX_USBSTAT0 : TI81XX_USBSTAT1));
-	}
-}
-
-static inline void phy_off(u8 id)
-{
-	u32 usbphycfg, ctrl_offs;
-	DBG(4, "phy_off..\n");
-
-	if (cpu_is_ti81xx()) {
-		ctrl_offs = id ? TI81XX_USBCTRL1 : TI81XX_USBCTRL0;
-		usbphycfg = omap_ctrl_readl(ctrl_offs);
-
-		if (cpu_is_ti816x())
-			usbphycfg &= ~(TI816X_USBPHY0_NORMAL_MODE
-				| TI816X_USBPHY1_NORMAL_MODE
-				| TI816X_USBPHY_REFCLK_OSC);
-		else if (cpu_is_ti814x())
-			usbphycfg |= TI814X_USBPHY_CM_PWRDN
-				| TI814X_USBPHY_OTG_PWRDN;
-
-		omap_ctrl_writel(usbphycfg, ctrl_offs);
-	}
-}
 
 /*
  * Because we don't set CTRL.UINT, it's "important" to:
@@ -958,6 +887,9 @@ int ti81xx_musb_set_mode(struct musb *musb, u8 musb_mode)
 int ti81xx_musb_init(struct musb *musb)
 {
 	void __iomem *reg_base = musb->ctrl_base;
+	struct device *dev = musb->controller;
+	struct musb_hdrc_platform_data *plat = dev->platform_data;
+	struct omap_musb_board_data *data = plat->board_data;
 	u32 rev;
 	u8 mode;
 
@@ -994,7 +926,8 @@ int ti81xx_musb_init(struct musb *musb)
 		cpu_relax();
 
 	/* Start the on-chip PHY and its PLL. */
-	phy_on(musb->id);
+	if (data->set_phy_power)
+		data->set_phy_power(musb->id, 1);
 
 	msleep(5);
 
@@ -1059,39 +992,21 @@ void ti81xx_musb_read_fifo(struct musb_hw_ep *hw_ep, u16 len, u8 *dst)
 
 int ti81xx_musb_exit(struct musb *musb)
 {
+	struct device *dev = musb->controller;
+	struct musb_hdrc_platform_data *plat = dev->platform_data;
+	struct omap_musb_board_data *data = plat->board_data;
+
 	if (is_host_enabled(musb))
 		del_timer_sync(&otg_workaround);
 
 	ti81xx_source_power(musb, 0, 1);
 
-	/* Delay to avoid problems with module reload... */
-	if (is_host_enabled(musb) && musb->xceiv->default_a) {
-		int maxdelay = 30;
-		u8 devctl, warn = 0;
+	/* Shutdown the on-chip PHY and its PLL. */
+	if (data->set_phy_power)
+		data->set_phy_power(musb->id, 0);
 
-		/*
-		 * If there's no peripheral connected, this can take a
-		 * long time to fall...
-		 */
-		do {
-			devctl = musb_readb(musb->mregs, MUSB_DEVCTL);
-			if (!(devctl & MUSB_DEVCTL_VBUS))
-				break;
-			if ((devctl & MUSB_DEVCTL_VBUS) != warn) {
-				warn = devctl & MUSB_DEVCTL_VBUS;
-				DBG(1, "VBUS %d\n",
-					warn >> MUSB_DEVCTL_VBUS_SHIFT);
-			}
-			msleep(1000);
-			maxdelay--;
-		} while (maxdelay > 0);
-
-		/* In OTG mode, another host might be connected... */
-		if (devctl & MUSB_DEVCTL_VBUS)
-			DBG(1, "VBUS off timeout (devctl %02x)\n", devctl);
-	}
-
-	phy_off(musb->id);
+	otg_put_transceiver(musb->xceiv);
+	usb_nop_xceiv_unregister(musb->id);
 
 #ifdef CONFIG_USB_TI_CPPI41_DMA
 	cppi41_exit();
@@ -1196,6 +1111,7 @@ static int __init ti81xx_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, glue);
 	glue->dev = &pdev->dev;
+	glue->phy_clk = otg_fck;
 
 	ret = platform_device_add(musb);
 	if (ret) {
@@ -1224,8 +1140,12 @@ static int __exit ti81xx_remove(struct platform_device *pdev)
 {
 	struct ti81xx_glue          *glue = platform_get_drvdata(pdev);
 
+	platform_device_del(glue->musb);
+	platform_device_put(glue->musb);
 	clk_disable(glue->clk);
+	clk_disable(glue->phy_clk);
 	clk_put(glue->clk);
+	clk_put(glue->phy_clk);
 	kfree(glue);
 
 	return 0;
