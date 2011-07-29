@@ -8,7 +8,7 @@ config USB_MUSB_HDRC
 	depends on USB && USB_GADGET
 	depends on (ARM || (BF54x && !BF544) || (BF52x && !BF522 && !BF523))
 	select NOP_USB_XCEIV if (ARCH_DAVINCI || MACH_OMAP3EVM || BLACKFIN)
-	select NOP_USB_XCEIV if (SOC_OMAPTI81XX)
+	select NOP_USB_XCEIV if (SOC_OMAPTI81XX || SOC_OMAPAM33XX)
 	select TWL4030_USB if MACH_OMAP_3430SDP
 	select TWL6030_USB if MACH_OMAP_4430SDP || MACH_OMAP4_PANDA
 	select USB_OTG_UTILS
@@ -61,8 +61,8 @@ config USB_MUSB_AM35X_GLUE
 
 config USB_MUSB_TI81XX_GLUE
 	select USB_MUSB_TI81XX
-	tristate "TI81XX"
-	depends on SOC_OMAPTI81XX && USB_MUSB_HDRC
+	tristate "TI81XX onward"
+	depends on (SOC_OMAPTI81XX || SOC_OMAPAM33XX) && USB_MUSB_HDRC
 
 config USB_MUSB_BLACKFIN_GLUE
 	select USB_MUSB_BLACKFIN
@@ -140,6 +140,7 @@ config USB_TI_CPPI41_DMA_HW
 	tristate
 	depends on USB_MUSB_HDRC && !MUSB_PIO_ONLY
 	default ARCH_DAVINCI_DA8XX || USB_MUSB_AM35X || SOC_OMAPTI81XX
+	default SOC_OMAPAM33XX
 	select CPPI41
 	help
 	 Configure this option to include the CPPI 4.1 support,
