@@ -173,7 +173,7 @@ void ti81xx_musb_phy_power(u8 id, u8 on)
 {
 	u32 usbphycfg, ctrl_offs;
 
-	ctrl_offs = id ? TI81XX_USBCTRL1 : TI81XX_USBCTRL0;
+	ctrl_offs = id ? USBCTRL1 : USBCTRL0;
 	usbphycfg = omap_ctrl_readl(ctrl_offs);
 
 	if (on) {
@@ -181,25 +181,15 @@ void ti81xx_musb_phy_power(u8 id, u8 on)
 			usbphycfg |= (TI816X_USBPHY0_NORMAL_MODE
 					| TI816X_USBPHY1_NORMAL_MODE);
 			usbphycfg &= ~(TI816X_USBPHY_REFCLK_OSC);
-		} else if (cpu_is_ti814x()) {
-			usbphycfg &= ~(TI814X_USBPHY_CM_PWRDN
-				| TI814X_USBPHY_OTG_PWRDN
-				| TI814X_USBPHY_DMPULLUP
-				| TI814X_USBPHY_DPPULLUP
-				| TI814X_USBPHY_DPINPUT
-				| TI814X_USBPHY_DMINPUT
-				| TI814X_USBPHY_DATA_POLARITY);
-			usbphycfg |= (TI814X_USBPHY_SRCONDM
-				| TI814X_USBPHY_SINKONDP
-				| TI814X_USBPHY_CHGISINK_EN
-				| TI814X_USBPHY_CHGVSRC_EN
-				| TI814X_USBPHY_CDET_EXTCTL
-				| TI814X_USBPHY_DPOPBUFCTL
-				| TI814X_USBPHY_DMOPBUFCTL
-				| TI814X_USBPHY_DPGPIO_PD
-				| TI814X_USBPHY_DMGPIO_PD
-				| TI814X_USBPHY_OTGVDET_EN
-				| TI814X_USBPHY_OTGSESSEND_EN);
+		} else if (cpu_is_ti814x() || cpu_is_am335x()) {
+			usbphycfg &= ~(USBPHY_CM_PWRDN | USBPHY_OTG_PWRDN);
+			usbphycfg |= (USBPHY_OTGVDET_EN | USBPHY_OTGSESSEND_EN);
+			if (cpu_is_ti814x()) {
+				usbphycfg &= ~(TI81XX_USBPHY_DPINPUT
+					| TI81XX_USBPHY_DMINPUT);
+				usbphycfg |= TI81XX_USBPHY_DPOPBUFCTL
+					| TI81XX_USBPHY_DPOPBUFCTL;
+			}
 		}
 
 		omap_ctrl_writel(usbphycfg, ctrl_offs);
@@ -208,9 +198,9 @@ void ti81xx_musb_phy_power(u8 id, u8 on)
 			usbphycfg &= ~(TI816X_USBPHY0_NORMAL_MODE
 				| TI816X_USBPHY1_NORMAL_MODE
 				| TI816X_USBPHY_REFCLK_OSC);
-		else if (cpu_is_ti814x())
-			usbphycfg |= TI814X_USBPHY_CM_PWRDN
-				| TI814X_USBPHY_OTG_PWRDN;
+		else if (cpu_is_ti814x() || cpu_is_am335x())
+			usbphycfg |= USBPHY_CM_PWRDN
+				| USBPHY_OTG_PWRDN;
 
 		omap_ctrl_writel(usbphycfg, ctrl_offs);
 	}

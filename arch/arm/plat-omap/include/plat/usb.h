@@ -340,38 +340,44 @@ static inline u32 omap1_usb2_init(unsigned nwires, unsigned alt_pingroup)
 
 #define USB_CPPI41_NUM_CH	15
 
-/* TI81XX specific definitions */
-#define TI81XX_USBCTRL0				0x0620
-#define TI81XX_USBSTAT0				0x0624
-#define TI81XX_USBCTRL1				0x0628
-#define TI81XX_USBSTAT1				0x062c
+/* TI81XX and AM335X specific definitions */
+#define USBCTRL0				0x0620
+#define USBSTAT0				0x0624
+#define USBCTRL1				0x0628
+#define USBSTAT1				0x062c
 
 /* TI816X PHY controls bits */
 #define	TI816X_USBPHY0_NORMAL_MODE		(1 << 0)
 #define	TI816X_USBPHY1_NORMAL_MODE		(1 << 1)
 #define	TI816X_USBPHY_REFCLK_OSC		(1 << 8)
 
-/* TI814X PHY controls bits */
-#define TI814X_USBPHY_CM_PWRDN		(1 << 0)
-#define TI814X_USBPHY_OTG_PWRDN		(1 << 1)
-#define TI814X_USBPHY_CHGDET_DIS	(1 << 2)
-#define TI814X_USBPHY_CHGDET_RSTRT	(1 << 3)
-#define TI814X_USBPHY_SRCONDM		(1 << 4)
-#define TI814X_USBPHY_SINKONDP		(1 << 5)
-#define TI814X_USBPHY_CHGISINK_EN	(1 << 6)
-#define TI814X_USBPHY_CHGVSRC_EN	(1 << 7)
-#define TI814X_USBPHY_DMPULLUP		(1 << 8)
-#define TI814X_USBPHY_DPPULLUP		(1 << 9)
-#define TI814X_USBPHY_CDET_EXTCTL	(1 << 10)
-#define TI814X_USBPHY_GPIO_MODE		(1 << 12)
-#define TI814X_USBPHY_DPOPBUFCTL	(1 << 13)
-#define TI814X_USBPHY_DMOPBUFCTL	(1 << 14)
-#define TI814X_USBPHY_DPINPUT		(1 << 15)
-#define TI814X_USBPHY_DMINPUT		(1 << 16)
-#define TI814X_USBPHY_DPGPIO_PD		(1 << 17)
-#define TI814X_USBPHY_DMGPIO_PD		(1 << 18)
-#define TI814X_USBPHY_OTGVDET_EN	(1 << 19)
-#define TI814X_USBPHY_OTGSESSEND_EN	(1 << 20)
-#define TI814X_USBPHY_DATA_POLARITY	(1 << 23)
+/* TI814X and AM335X PHY controls bits */
+#define USBPHY_CM_PWRDN		(1 << 0)
+#define USBPHY_OTG_PWRDN	(1 << 1)
+#define USBPHY_CHGDET_DIS	(1 << 2)
+#define USBPHY_CHGDET_RSTRT	(1 << 3)
+#define USBPHY_SRCONDM		(1 << 4)
+#define USBPHY_SINKONDP		(1 << 5)
+#define USBPHY_CHGISINK_EN	(1 << 6)
+#define USBPHY_CHGVSRC_EN	(1 << 7)
+#define USBPHY_DMPULLUP		(1 << 8)
+#define USBPHY_DPPULLUP		(1 << 9)
+#define USBPHY_CDET_EXTCTL	(1 << 10)
+#define USBPHY_GPIO_MODE	(1 << 12)
+#define USBPHY_DPGPIO_PD	(1 << 17)
+#define USBPHY_DMGPIO_PD	(1 << 18)
+#define USBPHY_OTGVDET_EN	(1 << 19)
+#define USBPHY_OTGSESSEND_EN	(1 << 20)
+#define USBPHY_DATA_POLARITY	(1 << 23)
+
+/* TI81XX only PHY bits */
+#define TI81XX_USBPHY_DPOPBUFCTL	(1 << 13)
+#define TI81XX_USBPHY_DMOPBUFCTL	(1 << 14)
+#define TI81XX_USBPHY_DPINPUT		(1 << 15)
+#define TI81XX_USBPHY_DMINPUT		(1 << 16)
+
+/* AM335X only PHY bits */
+#define AM335X_USBPHY_GPIO_SIG_INV	(1 << 13)
+#define AM335X_USBPHY_GPIO_SIG_CROSS	(1 << 14)
 
 #endif	/* __ASM_ARCH_OMAP_USB_H */
