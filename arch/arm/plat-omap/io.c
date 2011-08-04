@@ -85,7 +85,7 @@ void __iomem *omap_ioremap(unsigned long p, size_t size, unsigned int type)
 	}
 #endif
 #ifdef CONFIG_ARCH_OMAP3
-	if (cpu_is_ti816x()) {
+	if (cpu_is_ti81xx()) {
 		if (BETWEEN(p, L4_34XX_PHYS, L4_34XX_SIZE))
 			return XLATE(p, L4_34XX_PHYS, L4_34XX_VIRT);
 	} else if (cpu_is_omap34xx()) {

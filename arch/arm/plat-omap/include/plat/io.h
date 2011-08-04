@@ -283,10 +283,10 @@ static inline void omap34xx_map_common_io(void)
 }
 #endif
 
-#ifdef CONFIG_SOC_OMAPTI816X
-extern void omapti816x_map_common_io(void);
+#ifdef CONFIG_SOC_OMAPTI81XX
+extern void omapti81xx_map_common_io(void);
 #else
-static inline void omapti816x_map_common_io(void)
+static inline void omapti81xx_map_common_io(void)
 {
 }
 #endif

@@ -64,7 +64,7 @@
 		bne	9998f
 
 		/*
-		 * ti816x has additional IRQ pending register. Checking this
+		 * ti81xx has additional IRQ pending register. Checking this
 		 * register on omap2 & omap3 has no effect (read as 0).
 		 */
 		ldr	\irqnr, [\base, #0xf8] /* IRQ pending reg 4 */
@@ -141,7 +141,7 @@
 		bne	9999f
 		ldr	\irqnr, [\base, #0xd8] /* IRQ pending reg 3 */
 		cmp	\irqnr, #0x0
-#ifdef CONFIG_SOC_OMAPTI816X
+#ifdef CONFIG_SOC_OMAPTI81XX
 		bne	9999f
 		ldr	\irqnr, [\base, #0xf8] /* IRQ pending reg 4 */
 		cmp	\irqnr, #0x0
