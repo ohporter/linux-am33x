@@ -346,6 +346,22 @@ static void __init omap3_check_revision(void)
 			omap_revision =  TI8168_REV_ES1_1;
 		}
 		break;
+	case 0xb8f2:
+		omap_chip.oc = CHIP_IS_TI814X;
+
+		switch (rev) {
+		case 0:
+		/* FALLTHROUGH */
+		case 1:
+			omap_revision = TI8148_REV_ES1_0;
+			break;
+		case 2:
+			omap_revision = TI8148_REV_ES2_0;
+			break;
+		default:
+			omap_revision = TI8148_REV_ES2_1;
+		}
+		break;
 	default:
 		/* Unknown default to latest silicon rev as default*/
 		omap_revision =  OMAP3630_REV_ES1_2;
@@ -451,6 +467,8 @@ static void __init omap3_cpuinfo(void)
 		}
 	} else if (cpu_is_ti816x()) {
 		strcpy(cpu_name, "TI816X");
+	} else if (cpu_is_ti814x()) {
+		strcpy(cpu_name, "TI814X");
 	} else if (omap3_has_iva() && omap3_has_sgx()) {
 		/* OMAP3430, OMAP3525, OMAP3515, OMAP3503 devices */
 		strcpy(cpu_name, "OMAP3430/3530");
