@@ -214,7 +214,7 @@ static void omap_dm_timer_write_reg(struct omap_dm_timer *timer, u32 reg,
 static inline int omap_dm_timer_is_reset_done(struct omap_dm_timer *timer)
 {
 	/* TI816X timers do not have SYS_STAT register */
-	if (!cpu_is_ti816x())
+	if (!cpu_is_ti81xx())
 		return ((omap_dm_timer_read_reg(timer,
 					OMAP_TIMER_SYS_STAT_REG) & 1) == 1);
 	else
@@ -629,7 +629,7 @@ static int __init omap_dm_timer_init(void)
 		dm_timer_count = omap2_dm_timer_count;
 		dm_source_names = omap2_dm_source_names;
 		dm_source_clocks = omap2_dm_source_clocks;
-	} else if (cpu_is_ti816x()) {
+	} else if (cpu_is_ti81xx()) {
 		dm_timers = ti816x_dm_timers;
 		dm_timer_count = ti816x_dm_timer_count;
 		dm_source_names = ti816x_dm_source_names;

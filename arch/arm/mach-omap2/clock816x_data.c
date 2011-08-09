@@ -52,14 +52,14 @@ static struct clk main_pll_clk1_ck = {
 };
 
 static const struct clksel_rate div8_1to8_rates[] = {
-	{ .div = 1, .val = 0, .flags = RATE_IN_TI816X },
-	{ .div = 2, .val = 1, .flags = RATE_IN_TI816X },
-	{ .div = 3, .val = 2, .flags = RATE_IN_TI816X },
-	{ .div = 4, .val = 3, .flags = RATE_IN_TI816X },
-	{ .div = 5, .val = 4, .flags = RATE_IN_TI816X },
-	{ .div = 6, .val = 5, .flags = RATE_IN_TI816X },
-	{ .div = 7, .val = 6, .flags = RATE_IN_TI816X },
-	{ .div = 8, .val = 7, .flags = RATE_IN_TI816X },
+	{ .div = 1, .val = 0, .flags = RATE_IN_TI816X | RATE_IN_TI814X },
+	{ .div = 2, .val = 1, .flags = RATE_IN_TI816X | RATE_IN_TI814X },
+	{ .div = 3, .val = 2, .flags = RATE_IN_TI816X | RATE_IN_TI814X },
+	{ .div = 4, .val = 3, .flags = RATE_IN_TI816X | RATE_IN_TI814X },
+	{ .div = 5, .val = 4, .flags = RATE_IN_TI816X | RATE_IN_TI814X },
+	{ .div = 6, .val = 5, .flags = RATE_IN_TI816X | RATE_IN_TI814X },
+	{ .div = 7, .val = 6, .flags = RATE_IN_TI816X | RATE_IN_TI814X },
+	{ .div = 8, .val = 7, .flags = RATE_IN_TI816X | RATE_IN_TI814X },
 	{ .div = 0 },
 };
 
@@ -236,8 +236,8 @@ static struct clk main_pll_clk4_ck = {
 };
 
 static const struct clksel_rate div2_1to2_rates[] = {
-	{ .div = 1, .val = 0, .flags = RATE_IN_TI816X },
-	{ .div = 2, .val = 1, .flags = RATE_IN_TI816X },
+	{ .div = 1, .val = 0, .flags = RATE_IN_TI816X | RATE_IN_TI814X },
+	{ .div = 2, .val = 1, .flags = RATE_IN_TI816X | RATE_IN_TI814X },
 	{ .div = 0 },
 };
 
@@ -326,7 +326,7 @@ static struct clk tptc3_ick = {
 };
 
 static const struct clksel_rate div_4_1_rates[] = {
-	{ .div = 4, .val = 1, .flags = RATE_IN_TI816X },
+	{ .div = 4, .val = 1, .flags = RATE_IN_TI816X | RATE_IN_TI814X },
 	{ .div = 0 },
 };
 
@@ -517,7 +517,7 @@ static struct clk mmchs1_ick = {
 };
 
 static const struct clksel_rate div_2_1_rates[] = {
-	{ .div = 2, .val = 1, .flags = RATE_IN_TI816X },
+	{ .div = 2, .val = 1, .flags = RATE_IN_TI816X | RATE_IN_TI814X },
 	{ .div = 0 },
 };
 
@@ -750,17 +750,17 @@ static struct clk audio_pll_a_ck = {
 };
 
 static const struct clksel_rate div_1_0_rates[] = {
-	{ .div = 1, .val = 0, .flags = RATE_IN_TI816X },
+	{ .div = 1, .val = 0, .flags = RATE_IN_TI816X | RATE_IN_TI814X },
 	{ .div = 0 },
 };
 
 static const struct clksel_rate div_1_1_rates[] = {
-	{ .div = 1, .val = 1, .flags = RATE_IN_TI816X },
+	{ .div = 1, .val = 1, .flags = RATE_IN_TI816X | RATE_IN_TI814X },
 	{ .div = 0 },
 };
 
 static const struct clksel_rate div_1_2_rates[] = {
-	{ .div = 1, .val = 2, .flags = RATE_IN_TI816X },
+	{ .div = 1, .val = 2, .flags = RATE_IN_TI816X | RATE_IN_TI814X },
 	{ .div = 0 },
 };
 
@@ -992,93 +992,93 @@ static struct clk mcasp2_fck = {
 };
 
 static struct omap_clk ti816x_clks[] = {
-	CLK(NULL,		"sys_32k_ck",		&sys_32k_ck,		CK_TI816X),
-	CLK(NULL,		"tclkin_ck",		&tclkin_ck,		CK_TI816X),
-	CLK(NULL,		"osc_sys_ck",		&osc_sys_ck,		CK_TI816X),
-	CLK(NULL,		"main_pll_clk1_ck",	&main_pll_clk1_ck,	CK_TI816X),
-	CLK(NULL,		"sysclk1_ck",		&sysclk1_ck,		CK_TI816X),
-	CLK(NULL,		"dsp_ick",		&dsp_ick,		CK_TI816X),
-	CLK(NULL,		"main_pll_clk2_ck",	&main_pll_clk2_ck,	CK_TI816X),
-	CLK(NULL,		"sysclk2_ck",		&sysclk2_ck,		CK_TI816X),
-	CLK(NULL,		"mpu_ck",		&mpu_ck,		CK_TI816X),
-	CLK(NULL,		"sysclk23_ck",		&sysclk23_ck,		CK_TI816X),
-	CLK(NULL,		"sgx_ck",		&sgx_ck,		CK_TI816X),
-	CLK(NULL,		"main_pll_clk3_ck",	&main_pll_clk3_ck,	CK_TI816X),
-	CLK(NULL,		"sysclk3_ck",		&sysclk3_ck,		CK_TI816X),
-	CLK(NULL,		"hdvicp0_ck",		&hdvicp0_ck,		CK_TI816X),
-	CLK(NULL,		"hdvicp0_sl2_ick",	&hdvicp0_sl2_ick,	CK_TI816X),
-	CLK(NULL,		"hdvicp1_ck",		&hdvicp1_ck,		CK_TI816X),
-	CLK(NULL,		"hdvicp1_sl2_ick",	&hdvicp1_sl2_ick,	CK_TI816X),
-	CLK(NULL,		"hdvicp2_ck",		&hdvicp2_ck,		CK_TI816X),
-	CLK(NULL,		"hdvicp2_sl2_ick",	&hdvicp2_sl2_ick,	CK_TI816X),
-	CLK(NULL,		"main_pll_clk4_ck",	&main_pll_clk4_ck,	CK_TI816X),
-	CLK(NULL,		"sysclk4_ck",		&sysclk4_ck,		CK_TI816X),
-	CLK(NULL,		"mmu_ick",		&mmu_ick,		CK_TI816X),
-	CLK(NULL,		"ducati_ucache_ick",	&ducati_ucache_ick,	CK_TI816X),
-	CLK(NULL,		"tpcc_ick",		&tpcc_ick,		CK_TI816X),
-	CLK(NULL,		"tptc0_ick",		&tptc0_ick,		CK_TI816X),
-	CLK(NULL,		"tptc1_ick",		&tptc1_ick,		CK_TI816X),
-	CLK(NULL,		"tptc2_ick",		&tptc2_ick,		CK_TI816X),
-	CLK(NULL,		"tptc3_ick",		&tptc3_ick,		CK_TI816X),
-	CLK(NULL,		"sysclk6_ck",		&sysclk6_ck,		CK_TI816X),
-	CLK(NULL,		"mmu_cfg_ick",		&mmu_cfg_ick,		CK_TI816X),
-	CLK(NULL,		"mailbox_ick",		&mailbox_ick,		CK_TI816X),
-	CLK(NULL,		"spinbox_ick",		&spinbox_ick,		CK_TI816X),
-	CLK(NULL,		"gem_vbusp_fck",	&gem_vbusp_fck,		CK_TI816X),
-	CLK(NULL,		"uart1_ick",		&uart1_ick,		CK_TI816X),
-	CLK(NULL,		"uart2_ick",		&uart2_ick,		CK_TI816X),
-	CLK(NULL,		"uart3_ick",		&uart3_ick,		CK_TI816X),
-	CLK("omap2_mcspi.1",	"ick",			&mcspi1_ick,		CK_TI816X),
-	CLK(NULL,		"gpt1_ick",		&gpt1_ick,		CK_TI816X),
-	CLK(NULL,		"gpt2_ick",		&gpt2_ick,		CK_TI816X),
-	CLK(NULL,		"gpt3_ick",		&gpt3_ick,		CK_TI816X),
-	CLK(NULL,		"gpt4_ick",		&gpt4_ick,		CK_TI816X),
-	CLK(NULL,		"gpt5_ick",		&gpt5_ick,		CK_TI816X),
-	CLK(NULL,		"gpt6_ick",		&gpt6_ick,		CK_TI816X),
-	CLK(NULL,		"gpt7_ick",		&gpt7_ick,		CK_TI816X),
-	CLK(NULL,		"gpmc_fck",		&gpmc_fck,		CK_TI816X),
-	CLK("omap_i2c.1",	"ick",			&i2c1_ick,		CK_TI816X),
-	CLK("omap_i2c.2",	"ick",			&i2c2_ick,		CK_TI816X),
-	CLK("mmci-omap-hs.0",	"ick",			&mmchs1_ick,		CK_TI816X),
-	CLK(NULL,		"ddr_pll_clk2_ck",	&ddr_pll_clk2_ck,	CK_TI816X),
-	CLK(NULL,		"sysclk10_ck",		&sysclk10_ck,		CK_TI816X),
-	CLK(NULL,		"uart1_fck",		&uart1_fck,		CK_TI816X),
-	CLK(NULL,		"uart2_fck",		&uart2_fck,		CK_TI816X),
-	CLK(NULL,		"uart3_fck",		&uart3_fck,		CK_TI816X),
-	CLK(NULL,		"usbotg_ick",		&usbotg_ick,		CK_TI816X),
-	CLK(NULL,		"sysclk5_ck",		&sysclk5_ck,		CK_TI816X),
-	CLK(NULL,		"pcie_ck",		&pcie_ck,		CK_TI816X),
-	CLK("ahci.0",		NULL,		&sata_ick,		CK_TI816X),
-	CLK("davinci_emac.0",	NULL,			&emac1_ick,		CK_TI816X),
-	CLK("davinci_emac.1",	NULL,			&emac2_ick,		CK_TI816X),
-	CLK(NULL,		"ducati_ick",		&ducati_ick,		CK_TI816X),
-	CLK(NULL,		"gem_trc_fck",		&gem_trc_fck,		CK_TI816X),
-	CLK("omap2_mcspi.1",	"fck",			&mcspi1_fck,		CK_TI816X),
-	CLK("omap_i2c.1",	"fck",			&i2c1_fck,		CK_TI816X),
-	CLK("omap_i2c.2",	"fck",			&i2c2_fck,		CK_TI816X),
-	CLK("mmci-omap-hs.0",	"fck",			&mmchs1_fck,		CK_TI816X),
-	CLK(NULL,		"main_pll_clk5_ck",	&main_pll_clk5_ck,	CK_TI816X),
-	CLK(NULL,		"sysclk24_ck",		&sysclk24_ck,		CK_TI816X),
-	CLK(NULL,		"audio_pll_clk1_ck",	&audio_pll_clk1_ck,	CK_TI816X),
-	CLK(NULL,		"audio_pll_a_ck",	&audio_pll_a_ck,	CK_TI816X),
-	CLK(NULL,		"sysclk18_ck",		&sysclk18_ck,		CK_TI816X),
-	CLK(NULL,		"gpt1_fck",		&gpt1_fck,		CK_TI816X),
-	CLK(NULL,		"gpt2_fck",		&gpt2_fck,		CK_TI816X),
-	CLK(NULL,		"gpt3_fck",		&gpt3_fck,		CK_TI816X),
-	CLK(NULL,		"gpt4_fck",		&gpt4_fck,		CK_TI816X),
-	CLK(NULL,		"gpt5_fck",		&gpt5_fck,		CK_TI816X),
-	CLK(NULL,		"gpt6_fck",		&gpt6_fck,		CK_TI816X),
-	CLK(NULL,		"gpt7_fck",		&gpt7_fck,		CK_TI816X),
-	CLK("mmci-omap-hs.0",	"mmchsdb_fck",		&mmchsdb1_fck,		CK_TI816X),
-	CLK(NULL,		"audio_pll_clk3_ck",	&audio_pll_clk3_ck,	CK_TI816X),
-	CLK(NULL,		"sysclk20_ck",		&sysclk20_ck,		CK_TI816X),
-	CLK(NULL,		"audio_pll_clk4_ck",	&audio_pll_clk4_ck,	CK_TI816X),
-	CLK(NULL,		"sysclk21_ck",		&sysclk21_ck,		CK_TI816X),
-	CLK(NULL,		"audio_pll_clk5_ck",	&audio_pll_clk5_ck,	CK_TI816X),
-	CLK(NULL,		"sysclk22_ck",		&sysclk22_ck,		CK_TI816X),
-	CLK("davinci-mcasp.0",	NULL,			&mcasp0_fck,		CK_TI816X),
-	CLK("davinci-mcasp.1",	NULL,			&mcasp1_fck,		CK_TI816X),
-	CLK("davinci-mcasp.2",	NULL,			&mcasp2_fck,		CK_TI816X),
+	CLK(NULL,		"sys_32k_ck",		&sys_32k_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"tclkin_ck",		&tclkin_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"osc_sys_ck",		&osc_sys_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"main_pll_clk1_ck",	&main_pll_clk1_ck,	CK_TI816X | CK_TI814X),
+	CLK(NULL,		"sysclk1_ck",		&sysclk1_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"dsp_ick",		&dsp_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"main_pll_clk2_ck",	&main_pll_clk2_ck,	CK_TI816X | CK_TI814X),
+	CLK(NULL,		"sysclk2_ck",		&sysclk2_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"mpu_ck",		&mpu_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"sysclk23_ck",		&sysclk23_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"sgx_ck",		&sgx_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"main_pll_clk3_ck",	&main_pll_clk3_ck,	CK_TI816X | CK_TI814X),
+	CLK(NULL,		"sysclk3_ck",		&sysclk3_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"hdvicp0_ck",		&hdvicp0_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"hdvicp0_sl2_ick",	&hdvicp0_sl2_ick,	CK_TI816X | CK_TI814X),
+	CLK(NULL,		"hdvicp1_ck",		&hdvicp1_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"hdvicp1_sl2_ick",	&hdvicp1_sl2_ick,	CK_TI816X | CK_TI814X),
+	CLK(NULL,		"hdvicp2_ck",		&hdvicp2_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"hdvicp2_sl2_ick",	&hdvicp2_sl2_ick,	CK_TI816X | CK_TI814X),
+	CLK(NULL,		"main_pll_clk4_ck",	&main_pll_clk4_ck,	CK_TI816X | CK_TI814X),
+	CLK(NULL,		"sysclk4_ck",		&sysclk4_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"mmu_ick",		&mmu_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"ducati_ucache_ick",	&ducati_ucache_ick,	CK_TI816X | CK_TI814X),
+	CLK(NULL,		"tpcc_ick",		&tpcc_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"tptc0_ick",		&tptc0_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"tptc1_ick",		&tptc1_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"tptc2_ick",		&tptc2_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"tptc3_ick",		&tptc3_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"sysclk6_ck",		&sysclk6_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"mmu_cfg_ick",		&mmu_cfg_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"mailbox_ick",		&mailbox_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"spinbox_ick",		&spinbox_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gem_vbusp_fck",	&gem_vbusp_fck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"uart1_ick",		&uart1_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"uart2_ick",		&uart2_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"uart3_ick",		&uart3_ick,		CK_TI816X | CK_TI814X),
+	CLK("omap2_mcspi.1",	"ick",			&mcspi1_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gpt1_ick",		&gpt1_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gpt2_ick",		&gpt2_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gpt3_ick",		&gpt3_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gpt4_ick",		&gpt4_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gpt5_ick",		&gpt5_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gpt6_ick",		&gpt6_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gpt7_ick",		&gpt7_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gpmc_fck",		&gpmc_fck,		CK_TI816X | CK_TI814X),
+	CLK("omap_i2c.1",	"ick",			&i2c1_ick,		CK_TI816X | CK_TI814X),
+	CLK("omap_i2c.2",	"ick",			&i2c2_ick,		CK_TI816X | CK_TI814X),
+	CLK("mmci-omap-hs.0",	"ick",			&mmchs1_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"ddr_pll_clk2_ck",	&ddr_pll_clk2_ck,	CK_TI816X | CK_TI814X),
+	CLK(NULL,		"sysclk10_ck",		&sysclk10_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"uart1_fck",		&uart1_fck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"uart2_fck",		&uart2_fck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"uart3_fck",		&uart3_fck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"usbotg_ick",		&usbotg_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"sysclk5_ck",		&sysclk5_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"pcie_ck",		&pcie_ck,		CK_TI816X | CK_TI814X),
+	CLK("ahci.0",		NULL,		&sata_ick,		CK_TI816X | CK_TI814X),
+	CLK("davinci_emac.0",	NULL,			&emac1_ick,		CK_TI816X | CK_TI814X),
+	CLK("davinci_emac.1",	NULL,			&emac2_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"ducati_ick",		&ducati_ick,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gem_trc_fck",		&gem_trc_fck,		CK_TI816X | CK_TI814X),
+	CLK("omap2_mcspi.1",	"fck",			&mcspi1_fck,		CK_TI816X | CK_TI814X),
+	CLK("omap_i2c.1",	"fck",			&i2c1_fck,		CK_TI816X | CK_TI814X),
+	CLK("omap_i2c.2",	"fck",			&i2c2_fck,		CK_TI816X | CK_TI814X),
+	CLK("mmci-omap-hs.0",	"fck",			&mmchs1_fck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"main_pll_clk5_ck",	&main_pll_clk5_ck,	CK_TI816X | CK_TI814X),
+	CLK(NULL,		"sysclk24_ck",		&sysclk24_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"audio_pll_clk1_ck",	&audio_pll_clk1_ck,	CK_TI816X | CK_TI814X),
+	CLK(NULL,		"audio_pll_a_ck",	&audio_pll_a_ck,	CK_TI816X | CK_TI814X),
+	CLK(NULL,		"sysclk18_ck",		&sysclk18_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gpt1_fck",		&gpt1_fck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gpt2_fck",		&gpt2_fck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gpt3_fck",		&gpt3_fck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gpt4_fck",		&gpt4_fck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gpt5_fck",		&gpt5_fck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gpt6_fck",		&gpt6_fck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"gpt7_fck",		&gpt7_fck,		CK_TI816X | CK_TI814X),
+	CLK("mmci-omap-hs.0",	"mmchsdb_fck",		&mmchsdb1_fck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"audio_pll_clk3_ck",	&audio_pll_clk3_ck,	CK_TI816X | CK_TI814X),
+	CLK(NULL,		"sysclk20_ck",		&sysclk20_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"audio_pll_clk4_ck",	&audio_pll_clk4_ck,	CK_TI816X | CK_TI814X),
+	CLK(NULL,		"sysclk21_ck",		&sysclk21_ck,		CK_TI816X | CK_TI814X),
+	CLK(NULL,		"audio_pll_clk5_ck",	&audio_pll_clk5_ck,	CK_TI816X | CK_TI814X),
+	CLK(NULL,		"sysclk22_ck",		&sysclk22_ck,		CK_TI816X | CK_TI814X),
+	CLK("davinci-mcasp.0",	NULL,			&mcasp0_fck,		CK_TI816X | CK_TI814X),
+	CLK("davinci-mcasp.1",	NULL,			&mcasp1_fck,		CK_TI816X | CK_TI814X),
+	CLK("davinci-mcasp.2",	NULL,			&mcasp2_fck,		CK_TI816X | CK_TI814X),
 };
 
 int __init ti816x_clk_init(void)
@@ -1086,8 +1086,13 @@ int __init ti816x_clk_init(void)
 	struct omap_clk *c;
 	u32 cpu_clkflg;
 
-	cpu_mask = RATE_IN_TI816X;
-	cpu_clkflg = CK_TI816X;
+	if (cpu_is_ti814x()) {
+		cpu_mask = RATE_IN_TI814X;
+		cpu_clkflg = CK_TI814X;
+	} else {
+		cpu_mask = RATE_IN_TI816X;
+		cpu_clkflg = CK_TI816X;
+	}
 
 	clk_init(&omap2_clk_functions);
 

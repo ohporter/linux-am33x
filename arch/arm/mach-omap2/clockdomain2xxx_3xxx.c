@@ -151,7 +151,7 @@ static void _enable_hwsup(struct clockdomain *clkdm)
 	if (cpu_is_omap24xx())
 		omap2xxx_cm_clkdm_enable_hwsup(clkdm->pwrdm.ptr->prcm_offs,
 					       clkdm->clktrctrl_mask);
-	else if (cpu_is_ti816x())
+	else if (cpu_is_ti81xx())
 		ti816x_cm_clkdm_enable_hwsup(clkdm->cm_inst, clkdm->clkdm_offs,
 					       clkdm->clktrctrl_mask);
 	else if (cpu_is_omap34xx())
@@ -164,7 +164,7 @@ static void _disable_hwsup(struct clockdomain *clkdm)
 	if (cpu_is_omap24xx())
 		omap2xxx_cm_clkdm_disable_hwsup(clkdm->pwrdm.ptr->prcm_offs,
 						clkdm->clktrctrl_mask);
-	else if (cpu_is_ti816x())
+	else if (cpu_is_ti81xx())
 		ti816x_cm_clkdm_disable_hwsup(clkdm->cm_inst, clkdm->clkdm_offs,
 						clkdm->clktrctrl_mask);
 	else if (cpu_is_omap34xx())
@@ -221,7 +221,7 @@ static int omap2_clkdm_clk_disable(struct clockdomain *clkdm)
 
 static int omap3_clkdm_sleep(struct clockdomain *clkdm)
 {
-	if (cpu_is_ti816x())
+	if (cpu_is_ti81xx())
 		ti816x_cm_clkdm_force_sleep(clkdm->cm_inst, clkdm->clkdm_offs,
 				clkdm->clktrctrl_mask);
 	else
@@ -232,7 +232,7 @@ static int omap3_clkdm_sleep(struct clockdomain *clkdm)
 
 static int omap3_clkdm_wakeup(struct clockdomain *clkdm)
 {
-	if (cpu_is_ti816x())
+	if (cpu_is_ti81xx())
 		ti816x_cm_clkdm_force_wakeup(clkdm->cm_inst, clkdm->clkdm_offs,
 				clkdm->clktrctrl_mask);
 	else

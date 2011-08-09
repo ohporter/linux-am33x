@@ -3480,7 +3480,7 @@ int __init omap3xxx_clk_init(void)
 	} else if (cpu_is_omap3630()) {
 		cpu_mask = (RATE_IN_34XX | RATE_IN_36XX);
 		cpu_clkflg = CK_36XX;
-	} else if (cpu_is_ti816x()) {
+	} else if (cpu_is_ti81xx()) {
 		ti816x_clk_init();
 		return 0;
 	} else if (cpu_is_ti814x()) {

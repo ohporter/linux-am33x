@@ -29,7 +29,7 @@ static int omap2_pwrdm_set_next_pwrst(struct powerdomain *pwrdm, u8 pwrst)
 {
 	omap2_prm_rmw_mod_reg_bits(OMAP_POWERSTATE_MASK,
 				(pwrst << OMAP_POWERSTATE_SHIFT),
-				pwrdm->prcm_offs, cpu_is_ti816x() ?
+				pwrdm->prcm_offs, cpu_is_ti81xx() ?
 				TI816X_PM_PWSTCTRL : OMAP2_PM_PWSTCTRL);
 	return 0;
 }
@@ -37,7 +37,7 @@ static int omap2_pwrdm_set_next_pwrst(struct powerdomain *pwrdm, u8 pwrst)
 static int omap2_pwrdm_read_next_pwrst(struct powerdomain *pwrdm)
 {
 	return omap2_prm_read_mod_bits_shift(pwrdm->prcm_offs,
-					     cpu_is_ti816x() ?
+					     cpu_is_ti81xx() ?
 					     TI816X_PM_PWSTCTRL :
 					     OMAP2_PM_PWSTCTRL,
 					     OMAP_POWERSTATE_MASK);
@@ -46,7 +46,7 @@ static int omap2_pwrdm_read_next_pwrst(struct powerdomain *pwrdm)
 static int omap2_pwrdm_read_pwrst(struct powerdomain *pwrdm)
 {
 	return omap2_prm_read_mod_bits_shift(pwrdm->prcm_offs,
-					     cpu_is_ti816x() ?
+					     cpu_is_ti81xx() ?
 					     TI816X_PM_PWSTST : OMAP2_PM_PWSTST,
 					     OMAP_POWERSTATEST_MASK);
 }
@@ -119,7 +119,7 @@ static int omap2_pwrdm_wait_transition(struct powerdomain *pwrdm)
 	 */
 
 	/* XXX Is this udelay() value meaningful? */
-	while ((omap2_prm_read_mod_reg(pwrdm->prcm_offs, cpu_is_ti816x() ?
+	while ((omap2_prm_read_mod_reg(pwrdm->prcm_offs, cpu_is_ti81xx() ?
 					TI816X_PM_PWSTST : OMAP2_PM_PWSTST) &
 		OMAP_INTRANSITION_MASK) &&
 		(c++ < PWRDM_TRANSITION_BAILOUT))
