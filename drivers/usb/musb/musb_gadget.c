@@ -1872,6 +1872,7 @@ int __devinit musb_gadget_setup(struct musb *musb)
 
 	return 0;
 err:
+	musb->g.dev.parent = NULL;
 	device_unregister(&musb->g.dev);
 	return status;
 }
@@ -1879,7 +1880,8 @@ err:
 void musb_gadget_cleanup(struct musb *musb)
 {
 	usb_del_gadget_udc(&musb->g);
-	device_unregister(&musb->g.dev);
+	if (musb->g.dev.parent)
+		device_unregister(&musb->g.dev);
 }
 
 /*
