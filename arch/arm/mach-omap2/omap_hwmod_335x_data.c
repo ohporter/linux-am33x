@@ -52,13 +52,13 @@ static struct omap_hwmod am335x_ieee5000_hwmod;
 static struct omap_hwmod am335x_tptc0_hwmod;
 static struct omap_hwmod am335x_tptc1_hwmod;
 static struct omap_hwmod am335x_tptc2_hwmod;
-static struct omap_hwmod am335x_usb0_hwmod;
 static struct omap_hwmod am335x_gpio0_hwmod;
 static struct omap_hwmod am335x_gpio1_hwmod;
 static struct omap_hwmod am335x_gpio2_hwmod;
 static struct omap_hwmod am335x_gpio3_hwmod;
 static struct omap_hwmod am335x_i2c1_hwmod;
 static struct omap_hwmod am335x_i2c2_hwmod;
+static struct omap_hwmod am335x_usbss_hwmod;
 
 /*
  * Interconnects hwmod structures
@@ -2019,30 +2019,6 @@ static struct omap_hwmod am335x_uart6_hwmod = {
 	.slaves_cnt	= ARRAY_SIZE(am335x_uart6_slaves),
 };
 
-/* 'usb0' class */
-static struct omap_hwmod_class am335x_usb0_hwmod_class = {
-	.name = "usb0",
-};
-
-/* usb0 */
-static struct omap_hwmod_irq_info am335x_usb0_irqs[] = {
-	{ .irq = 18 },
-	{ .irq = -1 }
-};
-
-static struct omap_hwmod am335x_usb0_hwmod = {
-	.name		= "usb0",
-	.class		= &am335x_usb0_hwmod_class,
-	.mpu_irqs       = am335x_usb0_irqs,
-	.main_clk	= "core_100m_ck",
-	.prcm = {
-		.omap4 = {
-			.clkctrl_offs = AM335X_CM_PER_USB0_CLKCTRL_OFFSET,
-			.modulemode	= MODULEMODE_SWCTRL,
-		},
-	},
-};
-
 /* 'wd_timer1' class */
 static struct omap_hwmod_class am335x_wd_timer1_hwmod_class = {
 	.name = "wd_timer1",
@@ -2100,6 +2076,80 @@ static struct omap_hwmod am335x_wkup_m3_hwmod = {
 			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
+};
+
+/* L3 SLOW -> USBSS interface */
+static struct omap_hwmod_addr_space am335x_usbss_addr_space[] = {
+	{
+		.name		= "usbss",
+		.pa_start	= 0x47400000,
+		.pa_end		= 0x47400000 + SZ_4K - 1,
+		.flags		= ADDR_TYPE_RT
+	},
+	{
+		.name		= "musb0",
+		.pa_start	= 0x47401000,
+		.pa_end		= 0x47401000 + SZ_2K - 1,
+		.flags		= ADDR_TYPE_RT
+	},
+	{
+		.name		= "musb1",
+		.pa_start	= 0x47401800,
+		.pa_end		= 0x47401800 + SZ_2K - 1,
+		.flags		= ADDR_TYPE_RT
+	},
+	{
+	},
+};
+
+static struct omap_hwmod_class_sysconfig am335x_usbhsotg_sysc = {
+	.rev_offs	= 0x0,
+	.sysc_offs	= 0x10,
+	.sysc_flags	= (SYSC_HAS_SIDLEMODE | SYSC_HAS_SOFTRESET),
+	.idlemodes	= (SIDLE_FORCE | SIDLE_NO | SIDLE_SMART),
+	.sysc_fields	= &omap_hwmod_sysc_type2,
+};
+
+static struct omap_hwmod_class am335x_usbotg_class = {
+	.name = "usbotg",
+	.sysc = &am335x_usbhsotg_sysc,
+};
+
+static struct omap_hwmod_irq_info am335x_usbss_mpu_irqs[] = {
+	{ .name = "usbss-irq", .irq = 17, },
+	{ .name = "musb0-irq", .irq = 18, },
+	{ .name = "musb1-irq", .irq = 19, },
+	{ .irq = -1, },
+};
+
+static struct omap_hwmod_ocp_if am335x_l3_slow__usbss = {
+	.master		= &am335x_l3slow_hwmod,
+	.slave		= &am335x_usbss_hwmod,
+	.clk		= "usbotg_ick",
+	.addr		= am335x_usbss_addr_space,
+	.user		= OCP_USER_MPU,
+	.flags		= OCPIF_SWSUP_IDLE,
+};
+
+static struct omap_hwmod_ocp_if *am335x_usbss_slaves[] = {
+	&am335x_l3_slow__usbss,
+};
+
+static struct omap_hwmod am335x_usbss_hwmod = {
+	.name		= "usb_otg_hs",
+	.mpu_irqs	= am335x_usbss_mpu_irqs,
+	.main_clk	= "usbotg_fck",
+	.clkdm_name	= "wkup_usb_clkdm",
+	.prcm		= {
+		.omap4 = {
+			.clkctrl_offs = AM335X_CM_CLKDCOLDO_DPLL_PER_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
+		},
+	},
+	.slaves		= am335x_usbss_slaves,
+	.slaves_cnt	= ARRAY_SIZE(am335x_usbss_slaves),
+	.class		= &am335x_usbotg_class,
+	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
 };
 
 static __initdata struct omap_hwmod *am335x_hwmods[] = {
@@ -2219,6 +2269,8 @@ static __initdata struct omap_hwmod *am335x_hwmods[] = {
 	&am335x_wdt0_hwmod,
 	/* wkup_m3 class */
 	&am335x_wkup_m3_hwmod,
+	/* usb class */
+	&am335x_usbss_hwmod,
 	NULL,
 };
 
