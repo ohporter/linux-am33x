@@ -362,6 +362,10 @@ static void __init omap3_check_revision(void)
 			omap_revision = TI8148_REV_ES2_1;
 		}
 		break;
+	case 0xb944:
+		omap_revision = AM335X_REV_ES1_0;
+		omap_chip.oc = CHIP_IS_AM335X;
+		break;
 	default:
 		/* Unknown default to latest silicon rev as default*/
 		omap_revision =  OMAP3630_REV_ES1_2;
@@ -469,6 +473,8 @@ static void __init omap3_cpuinfo(void)
 		strcpy(cpu_name, "TI816X");
 	} else if (cpu_is_ti814x()) {
 		strcpy(cpu_name, "TI814X");
+	} else if (cpu_is_am335x()) {
+		strcpy(cpu_name, "AM335X");
 	} else if (omap3_has_iva() && omap3_has_sgx()) {
 		/* OMAP3430, OMAP3525, OMAP3515, OMAP3503 devices */
 		strcpy(cpu_name, "OMAP3430/3530");

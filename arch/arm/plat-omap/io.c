@@ -88,6 +88,11 @@ void __iomem *omap_ioremap(unsigned long p, size_t size, unsigned int type)
 	if (cpu_is_ti81xx()) {
 		if (BETWEEN(p, L4_34XX_PHYS, L4_34XX_SIZE))
 			return XLATE(p, L4_34XX_PHYS, L4_34XX_VIRT);
+	} else if (cpu_is_am33xx()) {
+		if (BETWEEN(p, L4_34XX_PHYS, L4_34XX_SIZE))
+			return XLATE(p, L4_34XX_PHYS, L4_34XX_VIRT);
+		if (BETWEEN(p, L4_WK_AM33XX_PHYS, L4_WK_AM33XX_SIZE))
+			return XLATE(p, L4_WK_AM33XX_PHYS, L4_WK_AM33XX_VIRT);
 	} else if (cpu_is_omap34xx()) {
 		if (BETWEEN(p, L3_34XX_PHYS, L3_34XX_SIZE))
 			return XLATE(p, L3_34XX_PHYS, L3_34XX_VIRT);
