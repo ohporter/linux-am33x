@@ -97,6 +97,10 @@ static inline void flush(void)
 	_DEBUG_LL_ENTRY(mach, TI81XX_UART##p##_BASE, OMAP_PORT_SHIFT,	\
 		TI81XXUART##p)
 
+#define DEBUG_LL_AM335X(p, mach)					\
+	_DEBUG_LL_ENTRY(mach, AM335X_UART##p##_BASE, OMAP_PORT_SHIFT,	\
+		AM335XUART##p)
+
 static inline void __arch_decomp_setup(unsigned long arch_id)
 {
 	int port = 0;
@@ -178,6 +182,8 @@ static inline void __arch_decomp_setup(unsigned long arch_id)
 		/* TI8148 base boards using UART1 */
 		DEBUG_LL_TI81XX(1, ti8148evm);
 
+		/* AM335x base boards using UART1 */
+		DEBUG_LL_AM335X(1, am335xevm);
 	} while (0);
 }
 
