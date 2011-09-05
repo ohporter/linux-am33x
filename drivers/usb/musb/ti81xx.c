@@ -887,7 +887,7 @@ static irqreturn_t ti81xx_interrupt(int irq, void *hci)
 	}
 
 	is_babble = is_host_capable() && (musb->int_usb & MUSB_INTR_BABBLE);
-	if (is_babble)
+	if (is_babble && musb->enable_babble_work)
 		musb->int_usb |= MUSB_INTR_DISCONNECT;
 
 	if (usbintr & (USB_INTR_DRVVBUS << USB_INTR_USB_SHIFT)) {
@@ -973,7 +973,7 @@ static irqreturn_t ti81xx_interrupt(int irq, void *hci)
 					 pend1, pend2);
 	}
 
-	if (is_babble) {
+	if (is_babble && musb->enable_babble_work) {
 		ERR("Babble: devtcl(%x)Restarting musb....\n",
 			 musb_readb(musb->mregs, MUSB_DEVCTL));
 		schedule_work(&musb->work);
@@ -1090,7 +1090,9 @@ int ti81xx_musb_init(struct musb *musb)
 	/* set musb controller to host mode */
 	musb_platform_set_mode(musb, mode);
 
+	/* enable babble workaround */
 	INIT_WORK(&musb->work, evm_deferred_musb_restart);
+	musb->enable_babble_work = 1;
 
 	musb_writel(reg_base, USB_IRQ_EOI, 0);
 	usbss_write(USBSS_IRQ_EOI, 0);
