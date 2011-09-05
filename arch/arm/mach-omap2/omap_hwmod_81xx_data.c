@@ -37,6 +37,7 @@ static struct omap_hwmod ti816x_l3_med_hwmod;
 static struct omap_hwmod ti816x_l4_fast_hwmod;
 static struct omap_hwmod ti816x_l3_slow_hwmod;
 static struct omap_hwmod ti816x_l4_slow_hwmod;
+static struct omap_hwmod ti81xx_usbss_hwmod;
 
 /* MPU -> L3 FAST */
 static struct omap_hwmod_ocp_if ti816x_mpu__l3_fast = {
@@ -672,6 +673,77 @@ static struct omap_hwmod ti816x_timer7_hwmod = {
 };
 
 
+/* L3 SLOW -> USBSS interface */
+static struct omap_hwmod_addr_space ti81xx_usbss_addr_space[] = {
+	{
+		.name		= "usbss",
+		.pa_start	= 0x47400000,
+		.pa_end		= 0x47400000 + SZ_4K - 1,
+		.flags		= ADDR_TYPE_RT
+	},
+	{
+		.name		= "musb0",
+		.pa_start	= 0x47401000,
+		.pa_end		= 0x47401000 + SZ_2K - 1,
+		.flags		= ADDR_TYPE_RT
+	},
+	{
+		.name		= "musb1",
+		.pa_start	= 0x47401800,
+		.pa_end		= 0x47401800 + SZ_2K - 1,
+		.flags		= ADDR_TYPE_RT
+	},
+};
+
+static struct omap_hwmod_class_sysconfig ti81xx_usbhsotg_sysc = {
+	.rev_offs	= 0x0,
+	.sysc_offs	= 0x10,
+	.sysc_flags     = (SYSC_HAS_SIDLEMODE | SYSC_HAS_SOFTRESET),
+	.idlemodes      = (SIDLE_FORCE | SIDLE_NO | SIDLE_SMART),
+	.sysc_fields    = &omap_hwmod_sysc_type2,
+};
+
+static struct omap_hwmod_class ti81xx_usbotg_class = {
+	.name = "usbotg",
+	.sysc = &ti81xx_usbhsotg_sysc,
+};
+
+static struct omap_hwmod_irq_info ti81xx_usbss_mpu_irqs[] = {
+	{ .name = "usbss-irq", .irq = 17, },
+	{ .name = "musb0-irq", .irq = 18, },
+	{ .name = "musb1-irq", .irq = 19, },
+	{ .irq = -1, },
+};
+
+static struct omap_hwmod_ocp_if ti81xx_l3_slow__usbss = {
+	.master		= &ti816x_l3_slow_hwmod,
+	.slave		= &ti81xx_usbss_hwmod,
+	.clk		= "usbotg_ick",
+	.addr		= ti81xx_usbss_addr_space,
+	.user		= OCP_USER_MPU,
+	.flags          = OCPIF_SWSUP_IDLE,
+};
+
+static struct omap_hwmod_ocp_if *ti81xx_usbss_slaves[] = {
+	&ti81xx_l3_slow__usbss,
+};
+
+static struct omap_hwmod ti81xx_usbss_hwmod = {
+	.name		= "usb_otg_hs",
+	.mpu_irqs	= ti81xx_usbss_mpu_irqs,
+	.main_clk	= "usbotg_ick",
+	.clkdm_name     = "default_usb_clkdm",
+	.prcm		= {
+		.omap4 = {
+			.clkctrl_offs = TI816X_CM_DEFAULT_USB_CLKCTRL_OFFSET, 
+		},
+	},
+	.slaves		= ti81xx_usbss_slaves,
+	.slaves_cnt	= ARRAY_SIZE(ti81xx_usbss_slaves),
+	.class		= &ti81xx_usbotg_class,
+	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_TI816X | CHIP_IS_TI814X)
+};
+
 static __initdata struct omap_hwmod *ti816x_hwmods[] = {
 	&ti816x_l3_fast_hwmod,
 	&ti816x_l3_med_hwmod,
@@ -689,6 +761,7 @@ static __initdata struct omap_hwmod *ti816x_hwmods[] = {
 	&ti816x_timer5_hwmod,
 	&ti816x_timer6_hwmod,
 	&ti816x_timer7_hwmod,
+	&ti81xx_usbss_hwmod,
 	NULL,
 };
 

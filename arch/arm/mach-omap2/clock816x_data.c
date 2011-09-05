@@ -1045,7 +1045,7 @@ static struct omap_clk ti816x_clks[] = {
 	CLK(NULL,		"uart1_fck",		&uart1_fck,		CK_TI816X | CK_TI814X),
 	CLK(NULL,		"uart2_fck",		&uart2_fck,		CK_TI816X | CK_TI814X),
 	CLK(NULL,		"uart3_fck",		&uart3_fck,		CK_TI816X | CK_TI814X),
-	CLK(NULL,		"usbotg_ick",		&usbotg_ick,		CK_TI816X | CK_TI814X),
+	CLK("ti81xx-usbss",	"usbotg_ick",		&usbotg_ick,		CK_TI816X | CK_TI814X),
 	CLK(NULL,		"sysclk5_ck",		&sysclk5_ck,		CK_TI816X | CK_TI814X),
 	CLK(NULL,		"pcie_ck",		&pcie_ck,		CK_TI816X | CK_TI814X),
 	CLK("ahci.0",		NULL,		&sata_ick,		CK_TI816X | CK_TI814X),
