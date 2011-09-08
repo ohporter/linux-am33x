@@ -31,6 +31,8 @@
 /* All OMAP4 specific defines are moved to irqs-44xx.h */
 #include "irqs-44xx.h"
 
+#include "irqs-am335x.h"
+
 /*
  * IRQ numbers for interrupt handler 1
  *
