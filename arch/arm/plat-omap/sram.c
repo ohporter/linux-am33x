@@ -406,7 +406,7 @@ static inline int omap34xx_sram_init(void)
 
 int __init omap_sram_init(void)
 {
-	if (cpu_is_ti81xx())
+	if (cpu_is_ti81xx() || cpu_is_am335x())
 		return 0;
 
 	omap_detect_sram();

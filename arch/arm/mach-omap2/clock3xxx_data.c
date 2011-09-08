@@ -3569,7 +3569,8 @@ int __init omap3xxx_clk_init(void)
 	 * Lock DPLL5 -- here only until other device init code can
 	 * handle this
 	 */
-	if (!cpu_is_ti81xx() && (omap_rev() >= OMAP3430_REV_ES2_0))
+	if (!cpu_is_ti81xx() && !cpu_is_am335x() &&
+			(omap_rev() >= OMAP3430_REV_ES2_0))
 		omap3_clk_lock_dpll5();
 
 	/* Avoid sleeping during omap3_core_dpll_m2_set_rate() */

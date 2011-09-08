@@ -567,7 +567,7 @@ void __init omap2_check_revision(void)
 		omap3_check_revision();
 
 		/* TI81XX doesn't have feature register */
-		if (!cpu_is_ti81xx())
+		if (!cpu_is_ti81xx() && !cpu_is_am335x())
 			omap3_check_features();
 		else
 			ti81xx_check_features();
