@@ -82,6 +82,8 @@
 #define LCD_V2_LIDD_CLK_EN		BIT(1)
 #define LCD_V2_CORE_CLK_EN		BIT(0)
 #define LCD_V2_LPP_B10			26
+#define LCD_V2_TFT_24BPP_MODE		BIT(25)
+#define LCD_V2_TFT_24BPP_UNPACK		BIT(26)
 
 /* LCD Raster Timing 2 Register */
 #define LCD_AC_BIAS_TRANSITIONS_PER_INT(x)	((x) << 16)
@@ -151,7 +153,7 @@ struct da8xx_fb_par {
 	unsigned int		dma_end;
 	struct clk *lcdc_clk;
 	int irq;
-	unsigned short pseudo_palette[16];
+	unsigned short pseudo_palette[32];
 	unsigned int palette_sz;
 	unsigned int pxl_clk;
 	int blank;
@@ -501,6 +503,11 @@ static int lcd_cfg_frame_buffer(struct da8xx_fb_par *par, u32 width, u32 height,
 	reg = lcdc_read(LCD_RASTER_CTRL_REG) & ~(1 << 8);
 	if (raster_order)
 		reg |= LCD_RASTER_ORDER;
+
+	if (bpp == 32)
+		reg |= (LCD_TFT_MODE | LCD_V2_TFT_24BPP_MODE
+				| LCD_V2_TFT_24BPP_UNPACK);
+
 	lcdc_write(reg, LCD_RASTER_CTRL_REG);
 
 	switch (bpp) {
@@ -508,6 +515,7 @@ static int lcd_cfg_frame_buffer(struct da8xx_fb_par *par, u32 width, u32 height,
 	case 2:
 	case 4:
 	case 16:
+	case 32:
 		par->palette_sz = 16 * 2;
 		break;
 
@@ -558,6 +566,22 @@ static int fb_setcolreg(unsigned regno, unsigned red, unsigned green,
 		green <<= info->var.green.offset;
 
 		blue >>= (16 - info->var.blue.length);
+		blue <<= info->var.blue.offset;
+
+		par->pseudo_palette[regno] = red | green | blue;
+
+		if (palette[0] != 0x4000) {
+			update_hw = 1;
+			palette[0] = 0x4000;
+		}
+	} else if ((info->var.bits_per_pixel == 32) && regno < 32) {
+		red >>= (24 - info->var.red.length);
+		red <<= info->var.red.offset;
+
+		green >>= (24 - info->var.green.length);
+		green <<= info->var.green.offset;
+
+		blue >>= (24 - info->var.blue.length);
 		blue <<= info->var.blue.offset;
 
 		par->pseudo_palette[regno] = red | green | blue;
@@ -808,6 +832,16 @@ static int fb_check_var(struct fb_var_screeninfo *var,
 		var->blue.length = 5;
 		var->transp.offset = 0;
 		var->transp.length = 0;
+		break;
+	case 32:
+		var->transp.offset = 24;
+		var->transp.length = 8;
+		var->red.offset = 16;
+		var->red.length = 8;
+		var->green.offset = 8;
+		var->green.length = 8;
+		var->blue.offset = 0;
+		var->blue.length = 8;
 		break;
 	default:
 		err = -EINVAL;
