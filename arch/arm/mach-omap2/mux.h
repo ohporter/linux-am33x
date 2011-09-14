@@ -11,6 +11,7 @@
 #include "mux2430.h"
 #include "mux34xx.h"
 #include "mux44xx.h"
+#include "mux335x.h"
 
 #define OMAP_MUX_TERMINATOR	0xffff
 
@@ -40,6 +41,28 @@
 
 /* 44xx specific mux bit defines */
 #define OMAP_WAKEUP_EVENT		(1 << 15)
+
+/* am335x specific mux bit defines */
+#define AM335X_SLEWCTRL_FAST		(0 << 6)
+#define AM335X_SLEWCTRL_SLOW		(1 << 6)
+#define AM335X_INPUT_EN			(1 << 5)
+#define AM335X_PULL_UP			(1 << 4)
+/* bit 3: 0 - enable, 1 - disable for pull enable */
+#define AM335X_PULL_DISA		(1 << 3)
+#define AM335X_PULL_ENBL		(0 << 3)
+
+/* Definition of output pin could have pull disabled, but
+ * this has not been done due to two reasons
+ * 1. AM335X_MUX will take care of it
+ * 2. If pull was disabled for out macro, combining out & in pull on macros
+ *    would disable pull resistor and AM335X_MUX cannot take care of the
+ *    correct pull setting and unintentionally pull would get disabled
+ */
+#define	AM335X_PIN_OUTPUT		(0)
+#define	AM335X_PIN_OUTPUT_PULLUP	(AM335X_PULL_UP)
+#define	AM335X_PIN_INPUT		(AM335X_INPUT_EN | AM335X_PULL_DISA)
+#define	AM335X_PIN_INPUT_PULLUP		(AM335X_INPUT_EN | AM335X_PULL_UP)
+#define	AM335X_PIN_INPUT_PULLDOWN	(AM335X_INPUT_EN)
 
 /* Active pin states */
 #define OMAP_PIN_OUTPUT			0
@@ -329,6 +352,12 @@ int omap3_mux_init(struct omap_board_mux *board_mux, int flags);
  */
 int omap4_mux_init(struct omap_board_mux *board_subset,
 	struct omap_board_mux *board_wkup_subset, int flags);
+
+/**
+ * am335x_mux_init() - initialize mux system along with board specific set
+ * @board_mux:		Board specific mux table
+ */
+int am335x_mux_init(struct omap_board_mux *board_mux);
 
 /**
  * omap_mux_init - private mux init function, do not call
