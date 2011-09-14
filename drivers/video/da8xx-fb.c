@@ -32,6 +32,7 @@
 #include <linux/console.h>
 #include <linux/slab.h>
 #include <video/da8xx-fb.h>
+#include <asm/mach-types.h>
 
 #define DRIVER_NAME "da8xx_lcdc"
 
@@ -175,7 +176,7 @@ static struct fb_var_screeninfo da8xx_fb_var __devinitdata = {
 	.activate = 0,
 	.height = -1,
 	.width = -1,
-	.pixclock = 46666,	/* 46us - AUO display */
+	.pixclock = 33333,	/* 46us - AUO display */
 	.accel_flags = 0,
 	.left_margin = LEFT_MARGIN,
 	.right_margin = RIGHT_MARGIN,
@@ -237,6 +238,20 @@ static struct da8xx_panel known_lcd_panels[] = {
 		.vbp = 2,
 		.vsw = 10,
 		.pxl_clk = 7833600,
+		.invert_pxl_clk = 0,
+	},
+	/* ThreeFive S9700RTWV35TR */
+	[2] = {
+		.name = "TFC_S9700RTWV35TR_01B",
+		.width = 800,
+		.height = 480,
+		.hfp = 39,
+		.hbp = 39,
+		.hsw = 47,
+		.vfp = 13,
+		.vbp = 29,
+		.vsw = 2,
+		.pxl_clk = 30000000,
 		.invert_pxl_clk = 0,
 	},
 };
@@ -664,7 +679,9 @@ static int lcd_init(struct da8xx_fb_par *par, const struct lcd_ctrl_config *cfg,
 	if (ret < 0)
 		return ret;
 
-	if (QVGA != cfg->p_disp_panel->panel_type)
+
+	if ((QVGA != cfg->p_disp_panel->panel_type) &&
+			(WVGA != cfg->p_disp_panel->panel_type))
 		return -EINVAL;
 
 	if (cfg->bpp <= cfg->p_disp_panel->max_bpp &&
@@ -1077,6 +1094,7 @@ static int __devinit fb_probe(struct platform_device *device)
 	struct da8xx_panel *lcdc_info;
 	struct fb_info *da8xx_fb_info;
 	struct clk *fb_clk = NULL;
+	struct clk *fb_l3ick = NULL, *fb_l4ick = NULL;
 	struct da8xx_fb_par *par;
 	resource_size_t len;
 	int ret, i;
@@ -1105,15 +1123,39 @@ static int __devinit fb_probe(struct platform_device *device)
 		goto err_request_mem;
 	}
 
+	if (machine_is_am335xevm()) {
+		fb_l3ick = clk_get(&device->dev, "lcdc_ick_l3_clk");
+		if (IS_ERR(fb_l3ick)) {
+			dev_err(&device->dev, "Can not get l3 interface"
+					"clock\n");
+			ret = -ENODEV;
+			goto err_ioremap;
+		}
+		ret = clk_enable(fb_l3ick);
+		if (ret)
+			goto err_clk_put0;
+
+		fb_l4ick = clk_get(&device->dev, "lcdc_ick_l4_clk");
+		if (IS_ERR(fb_l4ick)) {
+			dev_err(&device->dev, "Can not get l4 interface"
+					"clock\n");
+			ret = -ENODEV;
+			goto err_clk_get0;
+		}
+		ret = clk_enable(fb_l4ick);
+		if (ret)
+			goto err_clk_put1;
+	}
+
 	fb_clk = clk_get(&device->dev, NULL);
 	if (IS_ERR(fb_clk)) {
 		dev_err(&device->dev, "Can not get device clock\n");
 		ret = -ENODEV;
-		goto err_ioremap;
+		goto err_clk_get1;
 	}
 	ret = clk_enable(fb_clk);
 	if (ret)
-		goto err_clk_put;
+		goto err_clk_put2;
 
 	/* Determine LCD IP Version */
 	switch (lcdc_read(LCD_PID_REG)) {
@@ -1121,7 +1163,7 @@ static int __devinit fb_probe(struct platform_device *device)
 		lcd_revision = LCD_VERSION_1;
 		break;
 	case 0x4F200800:
-	case 0x4F201000
+	case 0x4F201000:
 		lcd_revision = LCD_VERSION_2;
 		break;
 	default:
@@ -1306,8 +1348,20 @@ err_release_fb:
 err_clk_disable:
 	clk_disable(fb_clk);
 
-err_clk_put:
+err_clk_put2:
 	clk_put(fb_clk);
+
+err_clk_get1:
+	clk_disable(fb_l4ick);
+
+err_clk_put1:
+	clk_put(fb_l4ick);
+
+err_clk_get0:
+	clk_disable(fb_l3ick);
+
+err_clk_put0:
+	clk_put(fb_l3ick);
 
 err_ioremap:
 	iounmap((void __iomem *)da8xx_fb_reg_base);
