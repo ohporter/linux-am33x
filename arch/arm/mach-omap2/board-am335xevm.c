@@ -14,6 +14,7 @@
  */
 #include <linux/kernel.h>
 #include <linux/init.h>
+#include <linux/i2c.h>
 
 #include <mach/hardware.h>
 #include <asm/mach-types.h>
@@ -23,6 +24,39 @@
 #include <plat/irqs.h>
 #include <plat/board.h>
 #include <plat/common.h>
+
+#include "mux.h"
+
+#ifdef CONFIG_OMAP_MUX
+static struct omap_board_mux board_mux[] __initdata = {
+	AM335X_MUX(I2C0_SDA, OMAP_MUX_MODE0 | AM335X_SLEWCTRL_SLOW |
+			AM335X_INPUT_EN | AM335X_PIN_OUTPUT),
+	AM335X_MUX(I2C0_SCL, OMAP_MUX_MODE0 | AM335X_SLEWCTRL_SLOW |
+			AM335X_INPUT_EN | AM335X_PIN_OUTPUT),
+	{ .reg_offset = OMAP_MUX_TERMINATOR },
+};
+#else
+#define	board_mux	NULL
+#endif
+
+/* module pin mux structure */
+struct pinmux_config {
+	const char *string_name; /* signal name format */
+	int val; /* Options for the mux register value */
+};
+
+/*
+* @pin_mux - single module pin-mux structure which defines pin-mux
+*			details for all its pins.
+*/
+static void setup_pin_mux(struct pinmux_config *pin_mux)
+{
+	int i;
+
+	for (i = 0; pin_mux->string_name != NULL; pin_mux++)
+		omap_mux_init_signal(pin_mux->string_name, pin_mux->val);
+
+}
 
 static struct omap_board_config_kernel am335x_evm_config[] __initdata = {
 };
@@ -34,6 +68,7 @@ static void __init am335x_init_early(void)
 
 static void __init am335x_evm_init(void)
 {
+	am335x_mux_init(board_mux);
 	omap_serial_init();
 	omap_sdrc_init(NULL, NULL);
 	omap_board_config = am335x_evm_config;
