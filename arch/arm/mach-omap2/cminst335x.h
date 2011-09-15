@@ -19,7 +19,7 @@ extern void am335x_cminst_clkdm_force_wakeup(s16 inst, u16 cdoffs);
 
 extern int am335x_cminst_wait_module_ready(u16 inst, s16 cdoffs, u16 clkctrl_offs);
 
-# ifdef CONFIG_MACH_AM335XEVM
+# ifdef CONFIG_SOC_OMAPAM33XX
 extern int am335x_cminst_wait_module_idle(u16 inst, s16 cdoffs,
 					 u16 clkctrl_offs);
 
