@@ -98,6 +98,7 @@ struct cppi41_channel {
 	u8  transfer_mode;
 	u8  zlp_queued;
 	u8  inf_mode;
+	u8  tx_complete;
 };
 
 /**
@@ -112,6 +113,7 @@ struct cppi41 {
 
 	struct cppi41_channel tx_cppi_ch[USB_CPPI41_NUM_CH];
 	struct cppi41_channel rx_cppi_ch[USB_CPPI41_NUM_CH];
+	struct work_struct      txdma_work;
 
 	struct usb_pkt_desc *pd_pool_head; /* Free PD pool head */
 	dma_addr_t pd_mem_phys;		/* PD memory physical address */
@@ -1193,6 +1195,7 @@ static int cppi41_channel_abort(struct dma_channel *channel)
 		csr |= MUSB_TXCSR_FLUSHFIFO | MUSB_TXCSR_H_WZC_BITS;
 		musb_writew(epio, MUSB_TXCSR, csr);
 		musb_writew(epio, MUSB_TXCSR, csr);
+		cppi_ch->tx_complete = 0;
 	} else { /* Rx */
 		dprintk("Rx channel teardown, cppi_ch = %p\n", cppi_ch);
 
@@ -1271,6 +1274,57 @@ static int cppi41_channel_abort(struct dma_channel *channel)
 	return 0;
 }
 
+void cppi41_check_fifo_empty(struct cppi41 *cppi)
+{
+	struct cppi41_channel *tx_ch;
+	struct musb *musb = cppi->musb;
+	unsigned index;
+	u8 resched = 0;
+
+	for (index = 0; index < USB_CPPI41_NUM_CH; index++) {
+		void __iomem *epio;
+		u16 csr;
+
+		tx_ch = &cppi->tx_cppi_ch[index];
+		if (tx_ch->tx_complete) {
+			/* Sometimes a EP can unregister from a DMA channel
+			 * while the data is still in the FIFO.  Probable
+			 * reason a proper abort was not called before taking
+			 * such a step.  Protect against such cases.
+			 */
+			if (!tx_ch->end_pt) {
+				tx_ch->tx_complete = 0;
+				continue;
+			}
+
+			epio = tx_ch->end_pt->regs;
+			csr = musb_readw(epio, MUSB_TXCSR);
+
+			if (csr & (MUSB_TXCSR_TXPKTRDY |
+				MUSB_TXCSR_FIFONOTEMPTY))
+				resched = 1;
+			else {
+				tx_ch->tx_complete = 0;
+				musb_dma_completion(musb, index+1, 1);
+			}
+		}
+	}
+
+	if (resched)
+		schedule_work(&cppi->txdma_work);
+}
+
+void txdma_completion_work(struct work_struct *data)
+{
+	struct cppi41 *cppi = container_of(data, struct cppi41, txdma_work);
+	struct musb *musb = cppi->musb;
+	unsigned long flags;
+
+	spin_lock_irqsave(&musb->lock, flags);
+	cppi41_check_fifo_empty(cppi);
+	spin_unlock_irqrestore(&musb->lock, flags);
+}
+
 /**
  * cppi41_dma_controller_create -
  * instantiate an object representing DMA controller.
@@ -1294,6 +1348,7 @@ cppi41_dma_controller_create(struct musb  *musb, void __iomem *mregs)
 	cppi->controller.channel_abort = cppi41_channel_abort;
 	cppi->cppi_info = (struct usb_cppi41_info *)&usb_cppi41_info[musb->id];;
 	cppi->en_bd_intr = cppi->cppi_info->bd_intr_ctrl;
+	INIT_WORK(&cppi->txdma_work, txdma_completion_work);
 
 	/* enable infinite mode only for ti81xx silicon rev2 */
 	if (cpu_is_am335x() || cpu_is_ti81xx()) {
@@ -1375,9 +1430,8 @@ static void usb_process_tx_queue(struct cppi41 *cppi, unsigned index)
 			 * USB functionality. So far, we have obsered
 			 * failure with iperf.
 			 */
-			udelay(20);
-			/* Tx completion routine callback */
-			musb_dma_completion(cppi->musb, ep_num, 1);
+			tx_ch->tx_complete = 1;
+			schedule_work(&cppi->txdma_work);
 		}
 	}
 }
