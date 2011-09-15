@@ -17,6 +17,8 @@
 #include <linux/i2c.h>
 #include <linux/i2c/at24.h>
 #include <linux/gpio.h>
+#include <linux/clk.h>
+#include <linux/err.h>
 
 #include <mach/hardware.h>
 #include <mach/board-am335xevm.h>
@@ -444,6 +446,23 @@ static void __init am335x_evm_i2c_init(void)
 
 	omap_register_i2c_bus(1, 100, am335x_i2c_boardinfo,
 				ARRAY_SIZE(am335x_i2c_boardinfo));
+}
+
+static int __init conf_disp_pll(int rate)
+{
+	struct clk *disp_pll;
+	int ret = -EINVAL;
+
+	disp_pll = clk_get(NULL, "dpll_disp_ck");
+	if (IS_ERR(disp_pll)) {
+		pr_err("Cannot clk_get disp_pll\n");
+		goto out;
+	}
+
+	ret = clk_set_rate(disp_pll, rate);
+	clk_put(disp_pll);
+out:
+	return ret;
 }
 
 static void __init am335x_evm_init(void)

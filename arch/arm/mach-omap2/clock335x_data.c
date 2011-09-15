@@ -1296,14 +1296,6 @@ static struct clk dpll_disp_m2_ck = {
 	.set_rate	= &omap2_clksel_set_rate,
 };
 
-static struct clk disp_m2_divby2 = {
-	.name		= "disp_div2_ck",
-	.parent		= &dpll_disp_m2_ck,
-	.ops		= &clkops_null,
-	.fixed_div	= 2,
-	.recalc		= &omap_fixed_divisor_recalc,
-};
-
 /* DPLL_MPU */
 static struct dpll_data dpll_mpu_dd = {
 	.mult_div1_reg	= AM335X_CM_CLKSEL_DPLL_MPU,
@@ -1464,7 +1456,7 @@ static struct clk icss_ocp_clk_mux_ck = {
 
 
 static const struct clksel lcd_clk_mux_sel[] = {
-	{ .parent = &disp_m2_divby2, .rates = div_1_0_rates },
+	{ .parent = &dpll_disp_m2_ck, .rates = div_1_0_rates },
 	{ .parent = &dpll_core_m5_ck, .rates = div_1_1_rates },
 	{ .parent = &dpll_per_m2_ck, .rates = div_1_2_rates },
 	{ .parent = NULL },
@@ -1766,7 +1758,6 @@ static struct omap_clk am335x_clks[] = {
 	CLK(NULL,	"l4ls_fck",		&l4ls_fck,	CK_AM335X),
 	CLK(NULL,	"l4wkup_fck",		&l4wkup_fck,	CK_AM335X),
 	CLK("da8xx_lcdc.0",	NULL,		&lcdc_fck,	CK_AM335X),
-	CLK(NULL,	"disp_div2_ck",		&disp_m2_divby2,	CK_AM335X),
 	CLK(NULL,	"mailbox0_fck",		&mailbox0_fck,	CK_AM335X),
 	CLK(NULL,               "mcasp1_ick",   &mcasp0_ick,	CK_AM335X),
 	CLK(NULL,               "mcasp2_ick",   &mcasp1_ick,	CK_AM335X),
