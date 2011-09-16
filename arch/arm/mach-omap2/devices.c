@@ -16,6 +16,10 @@
 #include <linux/clk.h>
 #include <linux/err.h>
 #include <linux/slab.h>
+#include <linux/davinci_emac.h>
+#include <linux/cpsw.h>
+#include <linux/etherdevice.h>
+#include <linux/dma-mapping.h>
 
 #include <mach/hardware.h>
 #include <mach/irqs.h>
@@ -39,6 +43,8 @@
 
 #define L3_MODULES_MAX_LEN 12
 #define L3_MODULES 3
+
+void am335x_cpsw_init(void);
 
 static int __init omap3_l3_init(void)
 {
@@ -692,10 +698,201 @@ static int __init omap2_init_devices(void)
 	omap_init_sham();
 	omap_init_aes();
 	omap_init_vout();
+	am335x_cpsw_init();
 
 	return 0;
 }
 arch_initcall(omap2_init_devices);
+
+#define AM335X_CPSW_BASE		(0x4A100000)
+#define AM335X_CPSW_MDIO_BASE		(0x4A101000)
+#define AM335X_CPSW_SS_BASE		(0x4A101200)
+#define AM335X_EMAC_MDIO_FREQ		(1000000)
+
+static u64 am335x_cpsw_dmamask = DMA_BIT_MASK(32);
+/* TODO : Verify the offsets */
+static struct cpsw_slave_data am335x_cpsw_slaves[] = {
+	{
+		.slave_reg_ofs  = 0x208,
+		.sliver_reg_ofs = 0xd80,
+		.phy_id		= "0:00",
+	},
+	{
+		.slave_reg_ofs  = 0x308,
+		.sliver_reg_ofs = 0xdc0,
+		.phy_id		= "0:01",
+	},
+};
+
+static struct cpsw_platform_data am335x_cpsw_pdata = {
+	.ss_reg_ofs		= 0x1200,
+	.channels		= 8,
+	.cpdma_reg_ofs		= 0x800,
+	.slaves			= 1,
+	.slave_data		= am335x_cpsw_slaves,
+	.ale_reg_ofs		= 0xd00,
+	.ale_entries		= 1024,
+	.host_port_reg_ofs      = 0x108,
+	.hw_stats_reg_ofs       = 0x900,
+	.bd_ram_ofs		= 0x2000,
+	.bd_ram_size		= SZ_8K,
+	.rx_descs               = 64,
+	.mac_control            = BIT(5), /* MIIEN */
+	.gigabit_en		= 1,
+	.host_port_num		= 0,
+	.no_bd_ram		= false,
+	.version		= CPSW_VERSION_2,
+};
+
+static struct mdio_platform_data am335x_cpsw_mdiopdata = {
+	.bus_freq       = AM335X_EMAC_MDIO_FREQ,
+};
+
+static struct resource am335x_cpsw_mdioresources[] = {
+	{
+		.start  = AM335X_CPSW_MDIO_BASE,
+		.end    = AM335X_CPSW_MDIO_BASE + SZ_256 - 1,
+		.flags  = IORESOURCE_MEM,
+	},
+};
+
+static struct platform_device am335x_cpsw_mdiodevice = {
+	.name           = "davinci_mdio",
+	.id             = 0,
+	.num_resources  = ARRAY_SIZE(am335x_cpsw_mdioresources),
+	.resource       = am335x_cpsw_mdioresources,
+	.dev.platform_data = &am335x_cpsw_mdiopdata,
+};
+
+static struct resource am335x_cpsw_resources[] = {
+	{
+		.start  = AM335X_CPSW_BASE,
+		.end    = AM335X_CPSW_BASE + SZ_2K - 1,
+		.flags  = IORESOURCE_MEM,
+	},
+	{
+		.start  = AM335X_CPSW_SS_BASE,
+		.end    = AM335X_CPSW_SS_BASE + SZ_256 - 1,
+		.flags  = IORESOURCE_MEM,
+	},
+	{
+		.start	= AM335X_IRQ_CPSW_C0_RX,
+		.end	= AM335X_IRQ_CPSW_C0_RX,
+		.flags	= IORESOURCE_IRQ,
+	},
+	{
+		.start	= AM335X_IRQ_CPSW_RX,
+		.end	= AM335X_IRQ_CPSW_RX,
+		.flags	= IORESOURCE_IRQ,
+	},
+	{
+		.start	= AM335X_IRQ_CPSW_TX,
+		.end	= AM335X_IRQ_CPSW_TX,
+		.flags	= IORESOURCE_IRQ,
+	},
+	{
+		.start	= AM335X_IRQ_CPSW_C0,
+		.end	= AM335X_IRQ_CPSW_C0,
+		.flags	= IORESOURCE_IRQ,
+	},
+};
+
+static struct platform_device am335x_cpsw_device = {
+	.name		=	"cpsw",
+	.id		=	0,
+	.num_resources	=	ARRAY_SIZE(am335x_cpsw_resources),
+	.resource	=	am335x_cpsw_resources,
+	.dev		=	{
+					.platform_data	= &am335x_cpsw_pdata,
+					.dma_mask	= &am335x_cpsw_dmamask,
+					.coherent_dma_mask = DMA_BIT_MASK(32),
+				},
+};
+
+static unsigned char  am335x_macid0[ETH_ALEN];
+static unsigned char  am335x_macid1[ETH_ALEN];
+static unsigned int   am335x_evmid;
+
+/*
+* am335x_evmid_fillup - set up board evmid
+* @evmid - evm id which needs to be configured
+*
+* This function is called to configure board evm id.
+* IA Motor Control EVM needs special setting of MAC PHY Id.
+* This function is called when IA Motor Control EVM is detected
+* during boot-up.
+*/
+void am335x_evmid_fillup(unsigned int evmid)
+{
+	am335x_evmid = evmid;
+	return;
+}
+
+/*
+* am335x_cpsw_macidfillup - setup mac adrresses
+* @eeprommacid0 - mac id 0 which needs to be configured
+* @eeprommacid1 - mac id 1 which needs to be configured
+*
+* This function is called to configure mac addresses.
+* Mac addresses are read from eeprom and this function is called
+* to store those mac adresses in am335x_macid0 and am335x_macid1.
+* In case, mac address read from eFuse are invalid, mac addresses
+* stored in these variable are used.
+*/
+void am335x_cpsw_macidfillup(char *eeprommacid0, char *eeprommacid1)
+{
+	u32 i;
+
+	/* Fillup these mac addresses with the mac adresses from eeprom */
+	for (i = 0; i < ETH_ALEN; i++) {
+		am335x_macid0[i] = eeprommacid0[i];
+		am335x_macid1[i] = eeprommacid1[i];
+	}
+
+	return;
+}
+
+void am335x_cpsw_init(void)
+{
+	u32 mac_lo, mac_hi;
+	u32 i;
+
+	mac_lo = omap_ctrl_readl(TI81XX_CONTROL_MAC_ID0_LO);
+	mac_hi = omap_ctrl_readl(TI81XX_CONTROL_MAC_ID0_HI);
+	am335x_cpsw_slaves[0].mac_addr[0] = mac_hi & 0xFF;
+	am335x_cpsw_slaves[0].mac_addr[1] = (mac_hi & 0xFF00) >> 8;
+	am335x_cpsw_slaves[0].mac_addr[2] = (mac_hi & 0xFF0000) >> 16;
+	am335x_cpsw_slaves[0].mac_addr[3] = (mac_hi & 0xFF000000) >> 24;
+	am335x_cpsw_slaves[0].mac_addr[4] = mac_lo & 0xFF;
+	am335x_cpsw_slaves[0].mac_addr[5] = (mac_lo & 0xFF00) >> 8;
+
+	/* Read MACID0 from eeprom if eFuse MACID is invalid */
+	if (!is_valid_ether_addr(am335x_cpsw_slaves[0].mac_addr)) {
+		for (i = 0; i < ETH_ALEN; i++)
+			am335x_cpsw_slaves[0].mac_addr[i] = am335x_macid0[i];
+	}
+
+	mac_lo = omap_ctrl_readl(TI81XX_CONTROL_MAC_ID1_LO);
+	mac_hi = omap_ctrl_readl(TI81XX_CONTROL_MAC_ID1_HI);
+	am335x_cpsw_slaves[1].mac_addr[0] = mac_hi & 0xFF;
+	am335x_cpsw_slaves[1].mac_addr[1] = (mac_hi & 0xFF00) >> 8;
+	am335x_cpsw_slaves[1].mac_addr[2] = (mac_hi & 0xFF0000) >> 16;
+	am335x_cpsw_slaves[1].mac_addr[3] = (mac_hi & 0xFF000000) >> 24;
+	am335x_cpsw_slaves[1].mac_addr[4] = mac_lo & 0xFF;
+	am335x_cpsw_slaves[1].mac_addr[5] = (mac_lo & 0xFF00) >> 8;
+
+	/* Read MACID1 from eeprom if eFuse MACID is invalid */
+	if (!is_valid_ether_addr(am335x_cpsw_slaves[1].mac_addr)) {
+		for (i = 0; i < ETH_ALEN; i++)
+			am335x_cpsw_slaves[1].mac_addr[i] = am335x_macid1[i];
+	}
+
+	platform_device_register(&am335x_cpsw_mdiodevice);
+	platform_device_register(&am335x_cpsw_device);
+	clk_add_alias(NULL, dev_name(&am335x_cpsw_mdiodevice.dev),
+			NULL, &am335x_cpsw_device.dev);
+}
+
 
 #if defined(CONFIG_OMAP_WATCHDOG) || defined(CONFIG_OMAP_WATCHDOG_MODULE)
 static struct omap_device_pm_latency omap_wdt_latency[] = {
