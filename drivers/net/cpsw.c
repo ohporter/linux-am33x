@@ -366,16 +366,31 @@ static void cpsw_set_slave_mac(struct cpsw_slave *slave,
 	__raw_writel(mac_lo(priv->mac_addr), &slave->regs->sa_lo);
 }
 
+static inline u32 cpsw_get_slave_port(struct cpsw_priv *priv, u32 slave_num)
+{
+	if (priv->host_port == 0)
+		return slave_num + 1;
+	else
+		return slave_num;
+}
+
 static void _cpsw_adjust_link(struct cpsw_slave *slave,
 			      struct cpsw_priv *priv, bool *link)
 {
 	struct phy_device	*phy = slave->phy;
 	u32			mac_control = 0;
+	u32			slave_port;
 
 	if (!phy)
 		return;
 
+	slave_port = cpsw_get_slave_port(priv, slave->slave_num);
+
 	if (phy->link) {
+		/* enable forwarding */
+		cpsw_ale_control_set(priv->ale, slave_port,
+			ALE_PORT_STATE, ALE_PORT_STATE_FORWARD);
+
 		mac_control = priv->data.mac_control;
 		if (phy->speed == 10)
 			mac_control |= BIT(18); /* In Band mode */
@@ -387,6 +402,8 @@ static void _cpsw_adjust_link(struct cpsw_slave *slave,
 			mac_control |= (BIT(15)|BIT(16));
 		*link = true;
 	} else {
+		cpsw_ale_control_set(priv->ale, slave_port,
+			     ALE_PORT_STATE, ALE_PORT_STATE_DISABLE);
 		mac_control = 0;
 	}
 
@@ -486,14 +503,6 @@ static ssize_t cpsw_hw_stats_show(struct device *dev,
 
 DEVICE_ATTR(hw_stats, S_IRUGO, cpsw_hw_stats_show, NULL);
 
-static inline u32 cpsw_get_slave_port(struct cpsw_priv *priv, u32 slave_num)
-{
-	if (priv->host_port == 0)
-		return slave_num + 1;
-	else
-		return slave_num;
-}
-
 #define PHY_CONFIG_REG	22
 static void cpsw_set_phy_config(struct cpsw_priv *priv, struct phy_device *phy)
 {
@@ -574,11 +583,7 @@ static void cpsw_slave_open(struct cpsw_slave *slave, struct cpsw_priv *priv)
 
 	slave->mac_control = 0;	/* no link yet */
 
-	/* enable forwarding */
 	slave_port = cpsw_get_slave_port(priv, slave->slave_num);
-	cpsw_ale_control_set(priv->ale, slave_port,
-			     ALE_PORT_STATE, ALE_PORT_STATE_FORWARD);
-
 	cpsw_ale_add_mcast(priv->ale, priv->ndev->broadcast,
 			   1 << slave_port);
 
