@@ -1377,21 +1377,23 @@ static const struct clksel gpio_dbclk_mux_sel[] = {
 	{ .parent = NULL },
 };
 
-static struct clk usb0_ick = {
-	.name           = "usb0_ick",
-	.parent		= &l3_main_fck,
+static struct clk usbotg_ick = {
+	.name           = "usbotg_ick",
 	.ops		= &clkops_omap2_dflt,
 	.enable_reg	= AM335X_CM_PER_USB0_CLKCTRL,
 	.enable_bit	= AM335X_MODULEMODE_SWCTRL,
+	.clkdm_name	= "l3s_clkdm",
+	.parent		= &core_100m_ck,
 	.recalc		= &followparent_recalc,
 };
 
-static struct clk usb0_fck = {
-	.name		= "usb0_fck",
+static struct clk usbotg_fck = {
+	.name		= "usbotg_fck",
 	.ops		= &clkops_omap2_dflt,
 	.enable_reg	= AM335X_CM_CLKDCOLDO_DPLL_PER,
 	.enable_bit	= AM335X_ST_DPLL_CLKDCOLDO_SHIFT,
 	.parent		= &dpll_per_clkdcoldo_ck,
+	.clkdm_name	= "wkup_usb_clkdm",
 	.recalc		= &followparent_recalc,
 };
 
@@ -1822,8 +1824,8 @@ static struct omap_clk am335x_clks[] = {
 	CLK(NULL,	"uart4_ick",		&uart4_ick,	CK_AM335X),
 	CLK(NULL,	"uart5_ick",		&uart5_ick,	CK_AM335X),
 	CLK(NULL,	"uart6_ick",		&uart6_ick,	CK_AM335X),
-	CLK(NULL,	"usb0_ick",		&usb0_ick,	CK_AM335X),
-	CLK(NULL,	"usb0_fck",		&usb0_fck,	CK_AM335X),
+	CLK(NULL,	"usbotg_ick",		&usbotg_ick,	CK_AM335X),
+	CLK(NULL,	"usbotg_fck",		&usbotg_fck,	CK_AM335X),
 	CLK(NULL,	"wd_timer1_fck",	&wd_timer1_fck,	CK_AM335X),
 	CLK(NULL,	"wdt0_fck",		&wdt0_fck,	CK_AM335X),
 	CLK(NULL,	"wkup_m3_fck",		&wkup_m3_fck,	CK_AM335X),

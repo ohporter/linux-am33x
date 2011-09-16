@@ -202,6 +202,16 @@ static struct clockdomain l4_cefuse_am335x_clkdm = {
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
 };
 
+static struct clockdomain wkup_usb_335x_clkdm = {
+	.name		= "wkup_usb_clkdm",
+	.pwrdm		= { .name = "wkup_pwrdm" },
+	.cm_inst	= AM335X_CM_WKUP_MOD,
+	.clkdm_offs	= AM335X_CM_CLKDCOLDO_DPLL_PER_OFFSET,
+	.clktrctrl_mask	= AM335X_CLKTRCTRL_MASK,
+	.flags		= CLKDM_CAN_HWSUP_SWSUP,
+	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
+};
+
 static struct clockdomain *clockdomains_am335x[] __initdata = {
 	&l4ls_am335x_clkdm,
 	&l3s_am335x_clkdm,
@@ -221,6 +231,7 @@ static struct clockdomain *clockdomains_am335x[] __initdata = {
 	&gfx_l3_am335x_clkdm,
 	&gfx_l4ls_gfx_am335x_clkdm,
 	&l4_cefuse_am335x_clkdm,
+	&wkup_usb_335x_clkdm,
 	NULL,
 };
 
