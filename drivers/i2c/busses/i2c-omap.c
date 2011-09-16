@@ -1027,12 +1027,12 @@ omap_i2c_probe(struct platform_device *pdev)
 
 	if (cpu_is_omap7xx())
 		dev->reg_shift = 1;
-	else if (cpu_is_omap44xx())
+	else if (cpu_is_omap44xx() || cpu_is_am335x())
 		dev->reg_shift = 0;
 	else
 		dev->reg_shift = 2;
 
-	if (cpu_is_omap44xx())
+	if (cpu_is_omap44xx() || cpu_is_am335x())
 		dev->regs = (u8 *) omap4_reg_map;
 	else
 		dev->regs = (u8 *) reg_map;
