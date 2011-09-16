@@ -147,6 +147,7 @@
 
 #include "cm2xxx_3xxx.h"
 #include "cminst44xx.h"
+#include "cminst335x.h"
 #include "prm2xxx_3xxx.h"
 #include "prm44xx.h"
 #include "prminst44xx.h"
@@ -689,7 +690,7 @@ static void _disable_optional_clocks(struct omap_hwmod *oh)
 static void _enable_module(struct omap_hwmod *oh)
 {
 	/* The module mode does not exist prior OMAP4 */
-	if (cpu_is_omap24xx() || cpu_is_omap34xx())
+	if (!cpu_is_am335x() && (cpu_is_omap24xx() || cpu_is_omap34xx()))
 		return;
 
 	if (!oh->clkdm || !oh->prcm.omap4.modulemode)
@@ -698,7 +699,13 @@ static void _enable_module(struct omap_hwmod *oh)
 	pr_debug("omap_hwmod: %s: _enable_module: %d\n",
 		 oh->name, oh->prcm.omap4.modulemode);
 
-	omap4_cminst_module_enable(oh->prcm.omap4.modulemode,
+	if (cpu_is_am335x())
+		am335x_cminst_module_enable(oh->prcm.omap4.modulemode,
+				   oh->clkdm->cm_inst,
+				   oh->clkdm->clkdm_offs,
+				   oh->prcm.omap4.clkctrl_offs);
+	else
+		omap4_cminst_module_enable(oh->prcm.omap4.modulemode,
 				   oh->clkdm->prcm_partition,
 				   oh->clkdm->cm_inst,
 				   oh->clkdm->clkdm_offs,
@@ -715,7 +722,7 @@ static void _enable_module(struct omap_hwmod *oh)
 static void _disable_module(struct omap_hwmod *oh)
 {
 	/* The module mode does not exist prior OMAP4 */
-	if (cpu_is_omap24xx() || cpu_is_omap34xx())
+	if (!cpu_is_am335x() && (cpu_is_omap24xx() || cpu_is_omap34xx()))
 		return;
 
 	if (!oh->clkdm || !oh->prcm.omap4.modulemode)
@@ -723,7 +730,12 @@ static void _disable_module(struct omap_hwmod *oh)
 
 	pr_debug("omap_hwmod: %s: _disable_module\n", oh->name);
 
-	omap4_cminst_module_disable(oh->clkdm->prcm_partition,
+	if (cpu_is_am335x())
+		am335x_cminst_module_disable(oh->clkdm->cm_inst,
+				    oh->clkdm->clkdm_offs,
+				    oh->prcm.omap4.clkctrl_offs);
+	else
+		omap4_cminst_module_disable(oh->clkdm->prcm_partition,
 				    oh->clkdm->cm_inst,
 				    oh->clkdm->clkdm_offs,
 				    oh->prcm.omap4.clkctrl_offs);
@@ -1173,7 +1185,7 @@ static int _wait_target_ready(struct omap_hwmod *oh)
 static int _wait_target_disable(struct omap_hwmod *oh)
 {
 	/* TODO: For now just handle OMAP4+ */
-	if (cpu_is_omap24xx() || cpu_is_omap34xx())
+	if (!cpu_is_am335x() && (cpu_is_omap24xx() || cpu_is_omap34xx()))
 		return 0;
 
 	if (!oh)
@@ -1185,7 +1197,12 @@ static int _wait_target_disable(struct omap_hwmod *oh)
 	if (oh->flags & HWMOD_NO_IDLEST)
 		return 0;
 
-	return omap4_cminst_wait_module_idle(oh->clkdm->prcm_partition,
+	if (cpu_is_am335x())
+		return am335x_cminst_wait_module_idle(oh->clkdm->cm_inst,
+					     oh->clkdm->clkdm_offs,
+					     oh->prcm.omap4.clkctrl_offs);
+	else
+		return omap4_cminst_wait_module_idle(oh->clkdm->prcm_partition,
 					     oh->clkdm->cm_inst,
 					     oh->clkdm->clkdm_offs,
 					     oh->prcm.omap4.clkctrl_offs);
