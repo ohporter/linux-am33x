@@ -100,12 +100,13 @@ static struct omap_hwmod_ocp_if *am335x_l3_slow_slaves[] = {
 static struct omap_hwmod am335x_l3slow_hwmod = {
 	.name           = "l3_slow",
 	.class          = &l3_hwmod_class,
+	.clkdm_name	= "l3s_clkdm",
+	.flags		= (HWMOD_INIT_NO_IDLE | HWMOD_INIT_NO_RESET),
 	.masters        = am335x_l3_slow_masters,
 	.masters_cnt    = ARRAY_SIZE(am335x_l3_slow_masters),
 	.slaves         = am335x_l3_slow_slaves,
 	.slaves_cnt     = ARRAY_SIZE(am335x_l3_slow_slaves),
 	.omap_chip      = OMAP_CHIP_INIT(CHIP_IS_AM335X),
-	.clkdm_name	= "l3s_clkdm",
 };
 
 /* L4 PER -> GPIO2 */
@@ -120,6 +121,7 @@ static struct omap_hwmod_addr_space am335x_gpio1_addrs[] = {
 static struct omap_hwmod_ocp_if am335x_l4_per__gpio1 = {
 	.master         = &am335x_l4per_hwmod,
 	.slave          = &am335x_gpio1_hwmod,
+	.clk		= "l4ls_fck",
 	.addr           = am335x_gpio1_addrs,
 	.user           = OCP_USER_MPU | OCP_USER_SDMA,
 };
@@ -136,6 +138,7 @@ static struct omap_hwmod_addr_space am335x_gpio2_addrs[] = {
 static struct omap_hwmod_ocp_if am335x_l4_per__gpio2 = {
 	.master         = &am335x_l4per_hwmod,
 	.slave          = &am335x_gpio2_hwmod,
+	.clk		= "l4ls_fck",
 	.addr           = am335x_gpio2_addrs,
 	.user           = OCP_USER_MPU | OCP_USER_SDMA,
 };
@@ -152,6 +155,7 @@ static struct omap_hwmod_addr_space am335x_gpio3_addrs[] = {
 static struct omap_hwmod_ocp_if am335x_l4_per__gpio3 = {
 	.master         = &am335x_l4per_hwmod,
 	.slave          = &am335x_gpio3_hwmod,
+	.clk		= "l4ls_fck",
 	.addr           = am335x_gpio3_addrs,
 	.user           = OCP_USER_MPU | OCP_USER_SDMA,
 };
@@ -170,12 +174,13 @@ static struct omap_hwmod_ocp_if *am335x_l4_per_slaves[] = {
 static struct omap_hwmod am335x_l4per_hwmod = {
 	.name           = "l4_per",
 	.class          = &l4_hwmod_class,
+	.clkdm_name	= "l4ls_clkdm",
+	.flags		= (HWMOD_INIT_NO_IDLE | HWMOD_INIT_NO_RESET),
 	.masters        = am335x_l4_per_masters,
 	.masters_cnt    = ARRAY_SIZE(am335x_l4_per_masters),
 	.slaves         = am335x_l4_per_slaves,
 	.slaves_cnt     = ARRAY_SIZE(am335x_l4_per_slaves),
 	.omap_chip      = OMAP_CHIP_INIT(CHIP_IS_AM335X),
-	.clkdm_name	= "l4ls_clkdm",
 };
 
 /* L4 WKUP -> I2C1 */
@@ -206,7 +211,7 @@ static struct omap_hwmod_addr_space am335x_gpio0_addrs[] = {
 static struct omap_hwmod_ocp_if am335x_l4_wkup__gpio0 = {
 	.master         = &am335x_l4wkup_hwmod,
 	.slave          = &am335x_gpio0_hwmod,
-	.clk		= "l4wkup_fck",
+	.clk		= "l4ls_fck",
 	.addr           = am335x_gpio0_addrs,
 	.user           = OCP_USER_MPU | OCP_USER_SDMA,
 };
@@ -223,12 +228,13 @@ static struct omap_hwmod_ocp_if *am335x_l4_wkup_slaves[] = {
 static struct omap_hwmod am335x_l4wkup_hwmod = {
 	.name           = "l4_wkup",
 	.class          = &l4_hwmod_class,
+	.clkdm_name	= "l4_wkup_clkdm",
+	.flags		= (HWMOD_INIT_NO_IDLE | HWMOD_INIT_NO_RESET),
 	.masters        = am335x_l4_wkup_masters,
 	.masters_cnt    = ARRAY_SIZE(am335x_l4_wkup_masters),
 	.slaves         = am335x_l4_wkup_slaves,
 	.slaves_cnt     = ARRAY_SIZE(am335x_l4_wkup_slaves),
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
-	.clkdm_name	= "l4_wkup_clkdm",
 };
 
 /* 'adc_tsc' class */
@@ -250,6 +256,7 @@ static struct omap_hwmod am335x_adc_tsc_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_WKUP_ADC_TSC_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -273,6 +280,7 @@ static struct omap_hwmod am335x_aes0_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_AES0_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -290,6 +298,7 @@ static struct omap_hwmod am335x_cefuse_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_CEFUSE_CEFUSE_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -306,6 +315,7 @@ static struct omap_hwmod am335x_clkdiv32k_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_CLK_24MHZ_CLKSTCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -329,6 +339,7 @@ static struct omap_hwmod am335x_control_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_WKUP_CONTROL_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -356,6 +367,7 @@ static struct omap_hwmod am335x_cpgmac0_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_CPGMAC0_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -379,6 +391,7 @@ static struct omap_hwmod am335x_dcan0_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_DCAN0_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -396,6 +409,7 @@ static struct omap_hwmod am335x_dcan1_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_DCAN1_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -412,6 +426,7 @@ static struct omap_hwmod am335x_debugss_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_WKUP_DEBUGSS_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -428,6 +443,7 @@ static struct omap_hwmod am335x_efuse_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_CEFUSE_CEFUSE_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -444,6 +460,7 @@ static struct omap_hwmod am335x_elm_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_ELM_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -461,6 +478,7 @@ static struct omap_hwmod am335x_emif_fw_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_EMIF_FW_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -477,6 +495,7 @@ static struct omap_hwmod am335x_epwmss0_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_EPWMSS0_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -488,6 +507,7 @@ static struct omap_hwmod am335x_epwmss1_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_EPWMSS1_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -499,6 +519,7 @@ static struct omap_hwmod am335x_epwmss2_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_EPWMSS2_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -545,7 +566,7 @@ static struct omap_hwmod_opt_clk gpio0_opt_clks[] = {
 
 /* gpio0 */
 static struct omap_hwmod am335x_gpio0_hwmod = {
-	.name		= "gpio0",
+	.name		= "gpio1",
 	.class		= &am335x_gpio_hwmod_class,
 	.flags		= HWMOD_CONTROL_OPT_CLKS_IN_RESET,
 	.mpu_irqs       = am335x_gpio0_irqs,
@@ -562,6 +583,7 @@ static struct omap_hwmod am335x_gpio0_hwmod = {
 	.dev_attr       = &gpio_dev_attr,
 	.slaves         = am335x_gpio0_slaves,
 	.slaves_cnt     = ARRAY_SIZE(am335x_gpio0_slaves),
+	.omap_chip      = OMAP_CHIP_INIT(CHIP_IS_AM335X),
 };
 
 /* gpio1 */
@@ -580,7 +602,7 @@ static struct omap_hwmod_opt_clk gpio1_opt_clks[] = {
 };
 
 static struct omap_hwmod am335x_gpio1_hwmod = {
-	.name		= "gpio1",
+	.name		= "gpio2",
 	.class		= &am335x_gpio_hwmod_class,
 	.flags		= HWMOD_CONTROL_OPT_CLKS_IN_RESET,
 	.mpu_irqs       = am335x_gpio1_irqs,
@@ -597,6 +619,7 @@ static struct omap_hwmod am335x_gpio1_hwmod = {
 	.dev_attr       = &gpio_dev_attr,
 	.slaves         = am335x_gpio1_slaves,
 	.slaves_cnt     = ARRAY_SIZE(am335x_gpio1_slaves),
+	.omap_chip      = OMAP_CHIP_INIT(CHIP_IS_AM335X),
 };
 
 /* gpio2 */
@@ -616,7 +639,7 @@ static struct omap_hwmod_opt_clk gpio2_opt_clks[] = {
 
 /* gpio2 */
 static struct omap_hwmod am335x_gpio2_hwmod = {
-	.name		= "gpio2",
+	.name		= "gpio3",
 	.class		= &am335x_gpio_hwmod_class,
 	.flags		= HWMOD_CONTROL_OPT_CLKS_IN_RESET,
 	.mpu_irqs       = am335x_gpio2_irqs,
@@ -633,6 +656,7 @@ static struct omap_hwmod am335x_gpio2_hwmod = {
 	.dev_attr       = &gpio_dev_attr,
 	.slaves         = am335x_gpio2_slaves,
 	.slaves_cnt     = ARRAY_SIZE(am335x_gpio2_slaves),
+	.omap_chip      = OMAP_CHIP_INIT(CHIP_IS_AM335X),
 };
 
 /* gpio3 */
@@ -652,7 +676,7 @@ static struct omap_hwmod_opt_clk gpio3_opt_clks[] = {
 
 /* gpio3 */
 static struct omap_hwmod am335x_gpio3_hwmod = {
-	.name		= "gpio3",
+	.name		= "gpio4",
 	.class		= &am335x_gpio_hwmod_class,
 	.flags		= HWMOD_CONTROL_OPT_CLKS_IN_RESET,
 	.mpu_irqs       = am335x_gpio3_irqs,
@@ -669,6 +693,7 @@ static struct omap_hwmod am335x_gpio3_hwmod = {
 	.dev_attr       = &gpio_dev_attr,
 	.slaves         = am335x_gpio3_slaves,
 	.slaves_cnt     = ARRAY_SIZE(am335x_gpio3_slaves),
+	.omap_chip      = OMAP_CHIP_INIT(CHIP_IS_AM335X),
 };
 
 /* 'gpmc' class */
@@ -684,6 +709,7 @@ static struct omap_hwmod am335x_gpmc_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_GPMC_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -717,6 +743,7 @@ static struct omap_hwmod am335x_i2c1_hwmod = {
 	.prcm           = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_WKUP_I2C0_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.slaves         = am335x_i2c1_slaves,
@@ -764,6 +791,7 @@ static struct omap_hwmod am335x_i2c2_hwmod = {
 	.prcm           = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_I2C1_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.slaves         = am335x_i2c2_slaves,
@@ -785,6 +813,7 @@ static struct omap_hwmod am335x_icss_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_ICSS_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -801,6 +830,7 @@ static struct omap_hwmod am335x_ieee5000_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_IEEE5000_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -815,9 +845,12 @@ static struct omap_hwmod_class am335x_l3_hwmod_class = {
 static struct omap_hwmod am335x_l4_hs_hwmod = {
 	.name		= "l4_hs",
 	.class		= &am335x_l3_hwmod_class,
+	.clkdm_name	= "l4hs_clkdm",
+	.flags		= (HWMOD_INIT_NO_IDLE | HWMOD_INIT_NO_RESET),
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_L4HS_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
@@ -827,9 +860,12 @@ static struct omap_hwmod am335x_l4_hs_hwmod = {
 static struct omap_hwmod am335x_l3_instr_hwmod = {
 	.name		= "l3_instr",
 	.class		= &am335x_l3_hwmod_class,
+	.clkdm_name	= "l3_clkdm",
+	.flags		= (HWMOD_INIT_NO_IDLE | HWMOD_INIT_NO_RESET),
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_L3_INSTR_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
@@ -839,9 +875,12 @@ static struct omap_hwmod am335x_l3_instr_hwmod = {
 static struct omap_hwmod am335x_l3_main_hwmod = {
 	.name		= "l3_main",
 	.class		= &am335x_l3_hwmod_class,
+	.clkdm_name	= "l3_clkdm",
+	.flags		= (HWMOD_INIT_NO_IDLE | HWMOD_INIT_NO_RESET),
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_L3_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
@@ -856,16 +895,18 @@ static struct omap_hwmod_class am335x_l4fw_hwmod_class = {
 static struct omap_hwmod am335x_l4fw_hwmod = {
 	.name		= "l4fw",
 	.class		= &am335x_l4fw_hwmod_class,
+	.clkdm_name	= "l4fw_clkdm",
+	.flags		= (HWMOD_INIT_NO_IDLE | HWMOD_INIT_NO_RESET),
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_L4FW_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
 };
 
 /* 'l4ls' class */
-
 static struct omap_hwmod_class am335x_l4ls_hwmod_class = {
 	.name = "l4ls",
 };
@@ -875,9 +916,12 @@ static struct omap_hwmod am335x_l4ls_hwmod = {
 	.name		= "l4ls",
 	.class		= &am335x_l4ls_hwmod_class,
 	.main_clk	= "l4ls_fck",
+	.clkdm_name	= "l4ls_clkdm",
+	.flags		= (HWMOD_INIT_NO_IDLE | HWMOD_INIT_NO_RESET),
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_L4LS_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
@@ -902,6 +946,7 @@ static struct omap_hwmod am335x_lcdc_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_LCDC_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -925,6 +970,7 @@ static struct omap_hwmod am335x_mcasp0_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_MCASP0_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -941,6 +987,7 @@ static struct omap_hwmod am335x_mlb_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_MLB_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -964,6 +1011,7 @@ static struct omap_hwmod am335x_mmc0_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_MMC0_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -982,6 +1030,7 @@ static struct omap_hwmod am335x_mmc1_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_MMC1_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1000,6 +1049,7 @@ static struct omap_hwmod am335x_mmc2_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_MMC2_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1021,6 +1071,7 @@ static struct omap_hwmod am335x_mpu_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_MPU_MPU_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
@@ -1038,6 +1089,7 @@ static struct omap_hwmod am335x_ocmcram_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_OCMCRAM_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1054,6 +1106,7 @@ static struct omap_hwmod am335x_ocpwp_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_OCPWP_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1077,6 +1130,7 @@ static struct omap_hwmod am335x_rtc_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_RTC_RTC_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1100,6 +1154,7 @@ static struct omap_hwmod am335x_sha0_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_SHA0_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1123,6 +1178,7 @@ static struct omap_hwmod am335x_smartreflex0_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_WKUP_SMARTREFLEX0_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1141,6 +1197,7 @@ static struct omap_hwmod am335x_smartreflex1_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_WKUP_SMARTREFLEX1_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1157,6 +1214,7 @@ static struct omap_hwmod am335x_spare0_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_SPARE0_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1168,6 +1226,7 @@ static struct omap_hwmod am335x_spare1_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_SPARE1_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1191,6 +1250,7 @@ static struct omap_hwmod am335x_spi0_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_SPI0_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1203,6 +1263,7 @@ static struct omap_hwmod am335x_spi1_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_SPI1_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1219,6 +1280,7 @@ static struct omap_hwmod am335x_spinlock_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_SPINLOCK_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1278,6 +1340,7 @@ static struct omap_hwmod am335x_timer0_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_WKUP_TIMER0_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
@@ -1322,6 +1385,7 @@ static struct omap_hwmod am335x_timer1_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_WKUP_TIMER1_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
@@ -1365,6 +1429,7 @@ static struct omap_hwmod am335x_timer2_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_TIMER2_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
@@ -1409,6 +1474,7 @@ static struct omap_hwmod am335x_timer3_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_TIMER3_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
@@ -1453,6 +1519,7 @@ static struct omap_hwmod am335x_timer4_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_TIMER4_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
@@ -1498,6 +1565,7 @@ static struct omap_hwmod am335x_timer5_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_TIMER5_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
@@ -1542,6 +1610,7 @@ static struct omap_hwmod am335x_timer6_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_TIMER6_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
@@ -1587,6 +1656,7 @@ static struct omap_hwmod am335x_timer7_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_TIMER7_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
@@ -1613,6 +1683,7 @@ static struct omap_hwmod am335x_tpcc_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_TPCC_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1635,6 +1706,7 @@ static struct omap_hwmod am335x_tptc0_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_TPTC0_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1652,6 +1724,7 @@ static struct omap_hwmod am335x_tptc1_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_TPTC1_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1669,6 +1742,7 @@ static struct omap_hwmod am335x_tptc2_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_TPTC2_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1732,6 +1806,7 @@ static struct omap_hwmod am335x_uart1_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_WKUP_UART0_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.slaves		= am335x_uart1_slaves,
@@ -1773,6 +1848,7 @@ static struct omap_hwmod am335x_uart2_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_UART1_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.slaves		= am335x_uart2_slaves,
@@ -1813,6 +1889,7 @@ static struct omap_hwmod am335x_uart3_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_UART2_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.slaves		= am335x_uart3_slaves,
@@ -1853,6 +1930,7 @@ static struct omap_hwmod am335x_uart4_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_UART3_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.slaves		= am335x_uart4_slaves,
@@ -1893,6 +1971,7 @@ static struct omap_hwmod am335x_uart5_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_UART4_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.slaves		= am335x_uart5_slaves,
@@ -1933,6 +2012,7 @@ static struct omap_hwmod am335x_uart6_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_UART5_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 	.slaves		= am335x_uart6_slaves,
@@ -1958,6 +2038,7 @@ static struct omap_hwmod am335x_usb0_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_USB0_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1975,6 +2056,7 @@ static struct omap_hwmod am335x_wd_timer1_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_WKUP_WDT1_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -1998,6 +2080,7 @@ static struct omap_hwmod am335x_wdt0_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_WKUP_WDT0_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
@@ -2014,26 +2097,38 @@ static struct omap_hwmod am335x_wkup_m3_hwmod = {
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_WKUP_WKUP_M3_CLKCTRL_OFFSET,
+			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
 };
 
 static __initdata struct omap_hwmod *am335x_hwmods[] = {
+	/* l3 class */
+	&am335x_l3_instr_hwmod,
+	&am335x_l3_main_hwmod,
 	/* l3s class */
 	&am335x_l3slow_hwmod,
+	/* l4hs class */
+	&am335x_l4_hs_hwmod,
+	/* l4fw class */
+	&am335x_l4fw_hwmod,
+	/* l4ls class */
+	&am335x_l4ls_hwmod,
 	/* l4per class */
 	&am335x_l4per_hwmod,
 	/* l4wkup class */
 	&am335x_l4wkup_hwmod,
 
+	/* clkdiv32k class */
+	&am335x_clkdiv32k_hwmod,
+	/* mpu class */
+	&am335x_mpu_hwmod,
 	/* adc_tsc class */
 	&am335x_adc_tsc_hwmod,
 	/* aes class */
 	&am335x_aes0_hwmod,
 	/* cefuse class */
 	&am335x_cefuse_hwmod,
-	/* clkdiv32k class */
-	&am335x_clkdiv32k_hwmod,
 	/* control class */
 	&am335x_control_hwmod,
 	/* cpgmac0 class */
@@ -2067,14 +2162,6 @@ static __initdata struct omap_hwmod *am335x_hwmods[] = {
 	&am335x_icss_hwmod,
 	/* ieee5000 class */
 	&am335x_ieee5000_hwmod,
-	/* l3 class */
-	&am335x_l4_hs_hwmod,
-	&am335x_l3_instr_hwmod,
-	&am335x_l3_main_hwmod,
-	/* l4fw class */
-	&am335x_l4fw_hwmod,
-	/* l4ls class */
-	&am335x_l4ls_hwmod,
 	/* lcdc class */
 	&am335x_lcdc_hwmod,
 	/* mcasp class */
@@ -2085,8 +2172,6 @@ static __initdata struct omap_hwmod *am335x_hwmods[] = {
 	&am335x_mmc0_hwmod,
 	&am335x_mmc1_hwmod,
 	&am335x_mmc2_hwmod,
-	/* mpu class */
-	&am335x_mpu_hwmod,
 	/* ocmcram class */
 	&am335x_ocmcram_hwmod,
 	/* ocpwp class */
