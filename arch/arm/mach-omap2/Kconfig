@@ -372,6 +372,13 @@ config OMAP3_SDRC_AC_TIMING
 	  wish to say no.  Selecting yes without understanding what is
 	  going on could result in system crashes;
 
+config OMAP3_EDMA
+	bool "OMAP3 EDMA support"
+	default n
+	depends on ARCH_OMAP3
+	help
+	  Select this option if EDMA is used
+
 endmenu
 
 endif
