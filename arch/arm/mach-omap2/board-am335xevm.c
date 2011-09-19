@@ -18,6 +18,8 @@
 #include <linux/i2c/at24.h>
 
 #include <mach/hardware.h>
+#include <mach/board-am335xevm.h>
+
 #include <asm/mach-types.h>
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
@@ -46,18 +48,29 @@ struct pinmux_config {
 	int val; /* Options for the mux register value */
 };
 
+struct evm_dev_cfg {
+	void (*device_init)(int evm_id, int profile);
+
 /*
-* @pin_mux - single module pin-mux structure which defines pin-mux
-*			details for all its pins.
+* If the device is required on both baseboard & daughter board (ex i2c),
+* specify DEV_ON_BASEBOARD
 */
-static void setup_pin_mux(struct pinmux_config *pin_mux)
-{
-	int i;
+#define DEV_ON_BASEBOARD	0
+#define DEV_ON_DGHTR_BRD	1
+	u32 device_on;
 
-	for (i = 0; pin_mux->string_name != NULL; pin_mux++)
-		omap_mux_init_signal(pin_mux->string_name, pin_mux->val);
+	u32 profile;	/* Profiles (0-7) in which the module is present */
+};
 
-}
+/* AM335X - CPLD Register Offsets */
+#define	CPLD_DEVICE_HDR	0x00 /* CPLD Header */
+#define	CPLD_DEVICE_ID	0x04 /* CPLD identification */
+#define	CPLD_DEVICE_REV	0x0C /* Revision of the CPLD code */
+#define	CPLD_CFG_REG	0x10 /* Configuration Register */
+
+static struct i2c_client *cpld_client;
+
+static u32 am335x_evm_id;
 
 static struct omap_board_config_kernel am335x_evm_config[] __initdata = {
 };
@@ -66,10 +79,6 @@ static void __init am335x_init_early(void)
 {
 	omap2_init_common_infrastructure();
 }
-
-#define BASEBOARD_I2C_ADDR	0x50
-#define DAUG_BOARD_I2C_ADDR	0x51
-#define LCD_BOARD_I2C_ADDR	0x52
 
 /*
 * EVM Config held in On-Board eeprom device.
@@ -113,6 +122,139 @@ static bool daughter_brd_detected;
 
 #define AM335X_EEPROM_HEADER		0xEE3355AA
 
+/* current profile if exists else PROFILE_0 on error */
+static u32 am335x_get_profile_selection(void)
+{
+	int val = 0;
+
+	if (!cpld_client)
+		/* error checking is not done in func's calling this routine.
+		so return profile 0 on error */
+		return 0;
+
+	val = i2c_smbus_read_word_data(cpld_client, CPLD_CFG_REG);
+	if (val < 0)
+		return 0;	/* default to Profile 0 on Error */
+	else
+		return val & 0x7;
+}
+
+/*
+* @pin_mux - single module pin-mux structure which defines pin-mux
+*			details for all its pins.
+*/
+static void setup_pin_mux(struct pinmux_config *pin_mux)
+{
+	int i;
+
+	for (i = 0; pin_mux->string_name != NULL; pin_mux++)
+		omap_mux_init_signal(pin_mux->string_name, pin_mux->val);
+
+}
+
+/*
+* @evm_id - evm id which needs to be configured
+* @dev_cfg - single evm structure which includes
+*				all module inits, pin-mux defines
+* @profile - if present, else PROFILE_NONE
+* @dghtr_brd_flg - Whether Daughter board is present or not
+*/
+static void _configure_device(int evm_id, struct evm_dev_cfg *dev_cfg,
+	int profile)
+{
+	int i;
+
+	/*
+	* Only General Purpose & Industrial Auto Motro Control
+	* EVM has profiles. So check if this evm has profile.
+	* If not, ignore the profile comparison
+	*/
+
+	/*
+	* If the device is on baseboard, directly configure it. Else (device on
+	* Daughter board), check if the daughter card is detected.
+	*/
+	if (profile == PROFILE_NONE) {
+		for (i = 0; dev_cfg->device_init != NULL; dev_cfg++) {
+			if (dev_cfg->device_on == DEV_ON_BASEBOARD)
+				dev_cfg->device_init(evm_id, profile);
+			else if (daughter_brd_detected == true)
+				dev_cfg->device_init(evm_id, profile);
+		}
+	} else {
+		for (i = 0; dev_cfg->device_init != NULL; dev_cfg++) {
+			if (dev_cfg->profile & profile) {
+				if (dev_cfg->device_on == DEV_ON_BASEBOARD)
+					dev_cfg->device_init(evm_id, profile);
+				else if (daughter_brd_detected == true)
+					dev_cfg->device_init(evm_id, profile);
+			}
+		}
+	}
+}
+
+/* Low-Cost EVM */
+static struct evm_dev_cfg low_cost_evm_dev_cfg[] = {
+	{NULL, 0, 0},
+};
+
+/* General Purpose EVM */
+static struct evm_dev_cfg gen_purp_evm_dev_cfg[] = {
+	{NULL, 0, 0},
+};
+
+/* Industrial Auto Motor Control EVM */
+static struct evm_dev_cfg ind_auto_mtrl_evm_dev_cfg[] = {
+	{NULL, 0, 0},
+};
+
+/* IP-Phone EVM */
+static struct evm_dev_cfg ip_phn_evm_dev_cfg[] = {
+	{NULL, 0, 0},
+};
+
+static void setup_low_cost_evm(void)
+{
+	pr_info("The board is a AM335x Low Cost EVM.\n");
+
+	_configure_device(LOW_COST_EVM, low_cost_evm_dev_cfg, PROFILE_NONE);
+}
+
+static void setup_general_purpose_evm(void)
+{
+	u32 prof_sel = am335x_get_profile_selection();
+
+	pr_info("The board is general purpose EVM in profile %d\n", prof_sel);
+
+	_configure_device(GEN_PURP_EVM, gen_purp_evm_dev_cfg, (1L << prof_sel));
+}
+
+static void setup_ind_auto_motor_ctrl_evm(void)
+{
+	u32 prof_sel = am335x_get_profile_selection();
+
+	pr_info("The board is an industrial automation EVM in profile %d\n",
+		prof_sel);
+
+	/* Only Profile 0 is supported */
+	if ((1L << prof_sel) != PROFILE_0) {
+		pr_err("AM335X: Only Profile 0 is supported\n");
+		pr_err("Assuming profile 0 & continuing\n");
+		prof_sel = PROFILE_0;
+	}
+
+	_configure_device(IND_AUT_MTR_EVM, ind_auto_mtrl_evm_dev_cfg,
+		PROFILE_0);
+
+}
+
+static void setup_ip_phone_evm(void)
+{
+	pr_info("The board is an IP phone EVM\n");
+
+	_configure_device(IP_PHN_EVM, ip_phn_evm_dev_cfg, PROFILE_NONE);
+}
+
 static void am335x_setup_daughter_board(struct memory_accessor *m, void *c)
 {
 	u8 tmp;
@@ -149,13 +291,13 @@ static void am335x_evm_setup(struct memory_accessor *mem_acc, void *context)
 	if (config.header != AM335X_EEPROM_HEADER) {
 		pr_warning("AM335X: wrong header 0x%x, expected 0x%x\n",
 			config.header, AM335X_EEPROM_HEADER);
-		return;
+		goto out;
 	}
 
 	if (strncmp("A335", config.name, 4)) {
 		pr_err("Board %s doesn't look like an AM335x board\n",
 			config.name);
-		return;
+		goto out;
 	}
 
 	snprintf(tmp, sizeof(config.name), "%s", config.name);
@@ -164,7 +306,28 @@ static void am335x_evm_setup(struct memory_accessor *mem_acc, void *context)
 	snprintf(tmp, 7, "%s", config.opt);
 	pr_info("SKU: %s\n", tmp);
 
+	if (!strncmp("SKU#00", config.opt, 6))
+		setup_low_cost_evm();
+	else if (!strncmp("SKU#01", config.opt, 6))
+		setup_general_purpose_evm();
+	else if (!strncmp("SKU#02", config.opt, 6))
+		setup_ind_auto_motor_ctrl_evm();
+	else if (!strncmp("SKU#03", config.opt, 6))
+		setup_ip_phone_evm();
+	else
+		goto out;
+
 	return;
+out:
+	/*
+	 * for bring-up assume a full configuration, this should
+	 * eventually be changed to assume a minimal configuration
+	 */
+	pr_err("Could not detect any board, falling back to: "
+		"General purpose EVM in profile 0 with daughter card connected\n");
+	daughter_brd_detected = true;
+	setup_general_purpose_evm();
+
 }
 
 static struct at24_platform_data am335x_daughter_board_eeprom_info = {
@@ -212,8 +375,45 @@ static struct i2c_board_info __initdata am335x_i2c_boardinfo[] = {
 
 };
 
+static int cpld_reg_probe(struct i2c_client *client,
+	    const struct i2c_device_id *id)
+{
+	cpld_client = client;
+	return 0;
+}
+
+static int __devexit cpld_reg_remove(struct i2c_client *client)
+{
+	cpld_client = NULL;
+	return 0;
+}
+
+static const struct i2c_device_id cpld_reg_id[] = {
+	{ "cpld_reg", 0 },
+	{ }
+};
+
+static struct i2c_driver cpld_reg_driver = {
+	.driver = {
+		.name	= "cpld_reg",
+	},
+	.probe		= cpld_reg_probe,
+	.remove		= cpld_reg_remove,
+	.id_table	= cpld_reg_id,
+};
+
+static void evm_init_cpld(void)
+{
+	i2c_add_driver(&cpld_reg_driver);
+}
+
 static void __init am335x_evm_i2c_init(void)
 {
+	/* Initially assume Low Cost EVM Config */
+	am335x_evm_id = LOW_COST_EVM;
+
+	evm_init_cpld();
+
 	omap_register_i2c_bus(1, 100, am335x_i2c_boardinfo,
 				ARRAY_SIZE(am335x_i2c_boardinfo));
 }
