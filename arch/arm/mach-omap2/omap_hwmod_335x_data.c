@@ -740,6 +740,7 @@ static struct omap_hwmod am335x_i2c1_hwmod = {
 	.mpu_irqs       = i2c1_mpu_irqs,
 	.sdma_reqs      = i2c1_edma_reqs,
 	.main_clk       = "i2c1_fck",
+	.clkdm_name	= "l4_wkup_clkdm",
 	.prcm           = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_WKUP_I2C0_CLKCTRL_OFFSET,
@@ -788,6 +789,7 @@ static struct omap_hwmod am335x_i2c2_hwmod = {
 	.mpu_irqs       = i2c2_mpu_irqs,
 	.sdma_reqs      = i2c2_edma_reqs,
 	.main_clk       = "i2c2_fck",
+	.clkdm_name	= "l4ls_clkdm",
 	.prcm           = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_I2C1_CLKCTRL_OFFSET,
@@ -1471,16 +1473,16 @@ static struct omap_hwmod am335x_timer3_hwmod = {
 	.class		= &am335x_timer_hwmod_class,
 	.mpu_irqs       = am335x_timer3_irqs,
 	.main_clk	= "timer3_fck",
+	.clkdm_name	= "l4ls_clkdm",
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_TIMER3_CLKCTRL_OFFSET,
 			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
-	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
 	.slaves		= am335x_timer3_slaves,
 	.slaves_cnt	= ARRAY_SIZE(am335x_timer3_slaves),
-	.clkdm_name	= "l4ls_clkdm",
+	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
 };
 
 /* timer4 */
