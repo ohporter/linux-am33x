@@ -908,13 +908,18 @@ static int __devinit cpsw_probe(struct platform_device *pdev)
 	priv->msg_enable = netif_msg_init(debug_level, CPSW_DEBUG);
 	priv->rx_packet_max = max(rx_packet_max, 128);
 
-	if (is_valid_ether_addr(data->mac_addr))
+	if (is_valid_ether_addr(data->mac_addr)) {
 		memcpy(priv->mac_addr, data->mac_addr, ETH_ALEN);
-	else {
-		printk("Detected MACID=%x:%x:%x:%x:%x:%x\n",
-		priv->mac_addr[0], priv->mac_addr[1], priv->mac_addr[2],
-		priv->mac_addr[3], priv->mac_addr[4], priv->mac_addr[5]);
+		printk(KERN_INFO"Detected MACID=%x:%x:%x:%x:%x:%x\n",
+			priv->mac_addr[0], priv->mac_addr[1],
+			priv->mac_addr[2], priv->mac_addr[3],
+			priv->mac_addr[4], priv->mac_addr[5]);
+	} else {
 		random_ether_addr(priv->mac_addr);
+		printk(KERN_INFO"Detected MACID=%x:%x:%x:%x:%x:%x\n",
+			priv->mac_addr[0], priv->mac_addr[1],
+			priv->mac_addr[2], priv->mac_addr[3],
+			priv->mac_addr[4], priv->mac_addr[5]);
 	}
 
 	memcpy(ndev->dev_addr, priv->mac_addr, ETH_ALEN);
