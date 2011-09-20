@@ -321,3 +321,39 @@ void omap_dma_global_context_restore(void)
 				"SDMA wrapper\n");
 }
 EXPORT_SYMBOL(omap_dma_global_context_restore);
+
+int omap_dma_running(void)
+{
+	printk(KERN_WARNING "omap_dma_running: un-supported in SDMA wrapper\n");
+
+	return 0;
+}
+EXPORT_SYMBOL(omap_dma_running);
+
+void omap_set_dma_color_mode(int lch, enum omap_dma_color_mode mode, u32 color)
+{
+	printk(KERN_WARNING "omap_set_dma_color_mode: un-supported in"
+				"SDMA wrapper\n");
+}
+EXPORT_SYMBOL(omap_set_dma_color_mode);
+
+void omap_set_dma_dest_data_pack(int lch, int enable)
+{
+	printk(KERN_WARNING "omap_set_dma_dest_data_pack: un-supported in"
+				"SDMA wrapper\n");
+}
+EXPORT_SYMBOL(omap_set_dma_dest_data_pack);
+
+void omap_set_dma_src_data_pack(int lch, int enable)
+{
+	printk(KERN_WARNING "omap_set_dma_src_data_pack: un-supported in"
+				"SDMA wrapper\n");
+}
+EXPORT_SYMBOL(omap_set_dma_src_data_pack);
+
+void omap_set_dma_write_mode(int lch, enum omap_dma_write_mode mode)
+{
+	printk(KERN_WARNING "omap_set_dma_write_mode: un-supported in"
+				"SDMA wrapper\n");
+}
+EXPORT_SYMBOL(omap_set_dma_write_mode);
