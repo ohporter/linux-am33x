@@ -16,6 +16,7 @@
 #include <linux/init.h>
 #include <linux/i2c.h>
 #include <linux/i2c/at24.h>
+#include <linux/gpio.h>
 
 #include <mach/hardware.h>
 #include <mach/board-am335xevm.h>
@@ -193,6 +194,30 @@ static void _configure_device(int evm_id, struct evm_dev_cfg *dev_cfg,
 	}
 }
 
+/* Convert GPIO signal to GPIO pin number */
+#define GPIO_TO_PIN(bank, gpio) (32 * (bank) + (gpio))
+
+#define AM335X_LCD_BL_PIN	GPIO_TO_PIN(0, 7)
+
+/* Module pin mux for eCAP0 */
+static struct pinmux_config ecap0_pin_mux[] = {
+	{"ecap0_in_pwm0_out.gpio0_7", AM335X_PIN_OUTPUT},
+	{NULL, 0},
+};
+
+static void ecap0_init(int evm_id, int profile)
+{
+	int status;
+
+	setup_pin_mux(ecap0_pin_mux);
+
+	status = gpio_request(AM335X_LCD_BL_PIN, "lcd bl\n");
+	if (status < 0)
+		pr_warn("Failed to request gpio for LCD backlight\n");
+
+	gpio_direction_output(AM335X_LCD_BL_PIN, 1);
+}
+
 /* Low-Cost EVM */
 static struct evm_dev_cfg low_cost_evm_dev_cfg[] = {
 	{NULL, 0, 0},
@@ -200,6 +225,8 @@ static struct evm_dev_cfg low_cost_evm_dev_cfg[] = {
 
 /* General Purpose EVM */
 static struct evm_dev_cfg gen_purp_evm_dev_cfg[] = {
+	{ecap0_init,	DEV_ON_DGHTR_BRD, (PROFILE_0 | PROFILE_1 |
+						PROFILE_2 | PROFILE_7) },
 	{NULL, 0, 0},
 };
 
@@ -210,6 +237,7 @@ static struct evm_dev_cfg ind_auto_mtrl_evm_dev_cfg[] = {
 
 /* IP-Phone EVM */
 static struct evm_dev_cfg ip_phn_evm_dev_cfg[] = {
+	{ecap0_init,	DEV_ON_DGHTR_BRD, PROFILE_NONE},
 	{NULL, 0, 0},
 };
 
