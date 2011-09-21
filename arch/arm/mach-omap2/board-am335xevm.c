@@ -294,18 +294,29 @@ static struct pinmux_config ecap0_pin_mux[] = {
 	{NULL, 0},
 };
 
-static void ecap0_init(int evm_id, int profile)
+static int backlight_enable = false;
+
+static void enable_ecap0(int evm_id, int profile)
 {
-	int status;
-
-	setup_pin_mux(ecap0_pin_mux);
-
-	status = gpio_request(AM335X_LCD_BL_PIN, "lcd bl\n");
-	if (status < 0)
-		pr_warn("Failed to request gpio for LCD backlight\n");
-
-	gpio_direction_output(AM335X_LCD_BL_PIN, 1);
+	backlight_enable = true;
 }
+
+static int __init ecap0_init(void)
+{
+	int status = 0;
+
+	if (backlight_enable) {
+		setup_pin_mux(ecap0_pin_mux);
+
+		status = gpio_request(AM335X_LCD_BL_PIN, "lcd bl\n");
+		if (status < 0)
+			pr_warn("Failed to request gpio for LCD backlight\n");
+
+		gpio_direction_output(AM335X_LCD_BL_PIN, 1);
+	}
+	return status;
+}
+late_initcall(ecap0_init);
 
 static int __init conf_disp_pll(int rate)
 {
@@ -348,7 +359,7 @@ static struct evm_dev_cfg low_cost_evm_dev_cfg[] = {
 
 /* General Purpose EVM */
 static struct evm_dev_cfg gen_purp_evm_dev_cfg[] = {
-	{ecap0_init,	DEV_ON_DGHTR_BRD, (PROFILE_0 | PROFILE_1 |
+	{enable_ecap0,	DEV_ON_DGHTR_BRD, (PROFILE_0 | PROFILE_1 |
 						PROFILE_2 | PROFILE_7) },
 	{lcdc_init,	DEV_ON_DGHTR_BRD, (PROFILE_0 | PROFILE_1 |
 						PROFILE_2 | PROFILE_7) },
@@ -362,7 +373,7 @@ static struct evm_dev_cfg ind_auto_mtrl_evm_dev_cfg[] = {
 
 /* IP-Phone EVM */
 static struct evm_dev_cfg ip_phn_evm_dev_cfg[] = {
-	{ecap0_init,	DEV_ON_DGHTR_BRD, PROFILE_NONE},
+	{enable_ecap0,	DEV_ON_DGHTR_BRD, PROFILE_NONE},
 	{lcdc_init,	DEV_ON_DGHTR_BRD, PROFILE_NONE},
 	{NULL, 0, 0},
 };
