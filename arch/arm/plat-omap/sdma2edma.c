@@ -39,7 +39,7 @@
 #include <plat/tc.h>
 
 /* some edma specific hacks which might change */
-#include <asm/hardware/edma.h>
+#include <mach/edma.h>
 
 /**
  * omap_request_dma - allocate DMA channel and paired parameter RAM

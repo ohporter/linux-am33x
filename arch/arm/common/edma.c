@@ -20,7 +20,7 @@
 #include <linux/slab.h>
 #include <linux/io.h>
 
-#include <asm/hardware/edma.h>
+#include <mach/edma.h>
 
 /* Offsets matching "struct edmacc_param" */
 #define PARM_OPT		0x00

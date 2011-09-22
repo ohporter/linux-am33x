@@ -28,7 +28,7 @@
 #include <asm/pmu.h>
 
 #ifdef	CONFIG_OMAP3_EDMA
-#include <asm/hardware/edma.h>
+#include <mach/edma.h>
 #endif
 
 #include <plat/tc.h>
