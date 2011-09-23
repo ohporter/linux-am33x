@@ -46,6 +46,7 @@ static struct omap_hwmod am335x_timer4_hwmod;
 static struct omap_hwmod am335x_timer5_hwmod;
 static struct omap_hwmod am335x_timer6_hwmod;
 static struct omap_hwmod am335x_timer7_hwmod;
+static struct omap_hwmod am335x_wd_timer2_hwmod;
 static struct omap_hwmod am335x_cpgmac0_hwmod;
 static struct omap_hwmod am335x_icss_hwmod;
 static struct omap_hwmod am335x_ieee5000_hwmod;
@@ -2021,27 +2022,57 @@ static struct omap_hwmod am335x_uart6_hwmod = {
 	.slaves_cnt	= ARRAY_SIZE(am335x_uart6_slaves),
 };
 
-/* 'wd_timer1' class */
-static struct omap_hwmod_class am335x_wd_timer1_hwmod_class = {
-	.name = "wd_timer1",
+/* 'wd_timer' class */
+static struct omap_hwmod_class_sysconfig am335x_wd_timer_sysc = {
+	.rev_offs	= 0x0000,
+	.sysc_offs	= 0x0010,
+	.syss_offs	= 0x0014,
+	.sysc_flags	= SYSC_HAS_SOFTRESET,
+	.sysc_fields	= &omap_hwmod_sysc_type2,
 };
 
-/* wd_timer1 */
-static struct omap_hwmod am335x_wd_timer1_hwmod = {
-	.name		= "wd_timer1",
-	.class		= &am335x_wd_timer1_hwmod_class,
-	.main_clk	= "wd_timer1_fck",
+static struct omap_hwmod_class am335x_wd_timer_hwmod_class = {
+	.name		= "wd_timer",
+	.sysc		= &am335x_wd_timer_sysc,
+};
+
+static struct omap_hwmod_addr_space am335x_wd_timer2_addrs[] = {
+	{
+		.pa_start	= 0x44E35000,
+		.pa_end		= 0x44E35000 + SZ_4K - 1,
+		.flags		= ADDR_TYPE_RT
+	},
+	{ }
+};
+
+/* l4_wkup -> wd_timer2 */
+static struct omap_hwmod_ocp_if am335x_l4wkup__wd_timer2 = {
+	.master		= &am335x_l4wkup_hwmod,
+	.slave		= &am335x_wd_timer2_hwmod,
+	.addr		= am335x_wd_timer2_addrs,
+	.user		= OCP_USER_MPU,
+};
+
+/* wd_timer2 slave ports */
+static struct omap_hwmod_ocp_if *am335x_wd_timer2_slaves[] = {
+	&am335x_l4wkup__wd_timer2,
+};
+
+/* wd_timer2 */
+static struct omap_hwmod am335x_wd_timer2_hwmod = {
+	.name		= "wd_timer2",
+	.class		= &am335x_wd_timer_hwmod_class,
+	.main_clk	= "wd_timer2_fck",
+	.clkdm_name	= "l4_wkup_clkdm",
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_WKUP_WDT1_CLKCTRL_OFFSET,
 			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
-};
-
-/* 'wdt' class */
-static struct omap_hwmod_class am335x_wdt_hwmod_class = {
-	.name = "wdt",
+	.slaves		= am335x_wd_timer2_slaves,
+	.slaves_cnt	= ARRAY_SIZE(am335x_wd_timer2_slaves),
+	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
 };
 
 /* wdt0 */
@@ -2052,7 +2083,7 @@ static struct omap_hwmod_irq_info am335x_wdt0_irqs[] = {
 
 static struct omap_hwmod am335x_wdt0_hwmod = {
 	.name		= "wdt0",
-	.class		= &am335x_wdt_hwmod_class,
+	.class		= &am335x_wd_timer_hwmod_class,
 	.mpu_irqs       = am335x_wdt0_irqs,
 	.main_clk	= "wdt0_fck",
 	.prcm = {
@@ -2250,6 +2281,9 @@ static __initdata struct omap_hwmod *am335x_hwmods[] = {
 	&am335x_uart4_hwmod,
 	&am335x_uart5_hwmod,
 	&am335x_uart6_hwmod,
+	/* wd_timer class */
+	&am335x_wd_timer2_hwmod,
+	&am335x_wdt0_hwmod,
 	/* timer class */
 	&am335x_timer0_hwmod,
 	&am335x_timer1_hwmod,
@@ -2265,10 +2299,6 @@ static __initdata struct omap_hwmod *am335x_hwmods[] = {
 	&am335x_tptc0_hwmod,
 	&am335x_tptc1_hwmod,
 	&am335x_tptc2_hwmod,
-	/* wd_timer1 class */
-	&am335x_wd_timer1_hwmod,
-	/* wdt class */
-	&am335x_wdt0_hwmod,
 	/* wkup_m3 class */
 	&am335x_wkup_m3_hwmod,
 	/* usb class */
