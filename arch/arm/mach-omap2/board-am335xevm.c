@@ -69,6 +69,36 @@ struct da8xx_lcdc_platform_data TFC_S9700RTWV35TR_01B_pdata = {
 	.type			= "TFC_S9700RTWV35TR_01B",
 };
 
+/* TSc controller */
+#include <linux/input/ti_tscadc.h>
+
+static struct resource tsc_resources[]  = {
+	[0] = {
+		.start  = AM335X_TSC_BASE,
+		.end    = AM335X_TSC_BASE + SZ_8K - 1,
+		.flags  = IORESOURCE_MEM,
+	},
+	[1] = {
+		.start  = AM335X_IRQ_ADC_GEN,
+		.end    = AM335X_IRQ_ADC_GEN,
+		.flags  = IORESOURCE_IRQ,
+	},
+};
+
+static struct tsc_data am335x_touchscreen_data  = {
+	.wires  = 4,
+};
+
+static struct platform_device tsc_device = {
+	.name   = "tsc",
+	.id     = -1,
+	.dev    = {
+			.platform_data  = &am335x_touchscreen_data,
+	},
+	.num_resources  = ARRAY_SIZE(tsc_resources),
+	.resource       = tsc_resources,
+};
+
 #include "mux.h"
 
 #ifdef CONFIG_OMAP_MUX
@@ -228,6 +258,17 @@ static struct pinmux_config lcdc_pin_mux[] = {
 	{"lcd_ac_bias_en.lcd_ac_bias_en", OMAP_MUX_MODE0 | AM335X_PIN_OUTPUT},
 	{NULL, 0},
 };
+
+static struct pinmux_config tsc_pin_mux[] = {
+	{"ain0.ain0",           OMAP_MUX_MODE0 | AM335X_INPUT_EN},
+	{"ain1.ain1",           OMAP_MUX_MODE0 | AM335X_INPUT_EN},
+	{"ain2.ain2",           OMAP_MUX_MODE0 | AM335X_INPUT_EN},
+	{"ain3.ain3",           OMAP_MUX_MODE0 | AM335X_INPUT_EN},
+	{"vrefp.vrefp",         OMAP_MUX_MODE0 | AM335X_INPUT_EN},
+	{"vrefn.vrefn",         OMAP_MUX_MODE0 | AM335X_INPUT_EN},
+	{NULL, 0},
+};
+
 
 /* Module pin mux for rgmii1 */
 static struct pinmux_config rgmii1_pin_mux[] = {
@@ -409,6 +450,15 @@ static void lcdc_init(int evm_id, int profile)
 	return;
 }
 
+static void tsc_init(int evm_id, int profile)
+{
+	int err;
+	setup_pin_mux(tsc_pin_mux);
+	err = platform_device_register(&tsc_device);
+	if (err)
+		pr_err("failed to register touchscreen device\n");
+}
+
 static void rgmii1_init(int evm_id, int profile)
 {
 	setup_pin_mux(rgmii1_pin_mux);
@@ -439,6 +489,8 @@ static struct evm_dev_cfg gen_purp_evm_dev_cfg[] = {
 						PROFILE_2 | PROFILE_7) },
 	{lcdc_init,	DEV_ON_DGHTR_BRD, (PROFILE_0 | PROFILE_1 |
 						PROFILE_2 | PROFILE_7) },
+	{tsc_init,	DEV_ON_DGHTR_BRD, (PROFILE_0 | PROFILE_1 |
+						PROFILE_2 | PROFILE_7) },
 	{rgmii1_init,	DEV_ON_BASEBOARD, PROFILE_ALL},
 	{rgmii2_init,	DEV_ON_DGHTR_BRD, (PROFILE_1 | PROFILE_2 |
 						PROFILE_4 | PROFILE_6) },
@@ -455,6 +507,7 @@ static struct evm_dev_cfg ind_auto_mtrl_evm_dev_cfg[] = {
 static struct evm_dev_cfg ip_phn_evm_dev_cfg[] = {
 	{enable_ecap0,	DEV_ON_DGHTR_BRD, PROFILE_NONE},
 	{lcdc_init,	DEV_ON_DGHTR_BRD, PROFILE_NONE},
+	{tsc_init,	DEV_ON_DGHTR_BRD, PROFILE_NONE},
 	{rgmii1_init,	DEV_ON_BASEBOARD, PROFILE_NONE},
 	{rgmii2_init,	DEV_ON_DGHTR_BRD, PROFILE_NONE},
 	{NULL, 0, 0},
