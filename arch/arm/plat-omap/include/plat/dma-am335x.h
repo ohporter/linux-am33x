@@ -82,4 +82,7 @@
 #define AM335X_DMA_PWMSS2_ECAP				62
 #define AM335X_DMA_PWMSS2_EPW				63
 
+#define AM335X_DMA_MMCHS2_R				65	/* xBar */
+#define AM335X_DMA_MMCHS2_W				64	/* xBar */
+
 #endif

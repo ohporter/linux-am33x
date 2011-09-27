@@ -60,6 +60,9 @@ static struct omap_hwmod am335x_gpio3_hwmod;
 static struct omap_hwmod am335x_i2c1_hwmod;
 static struct omap_hwmod am335x_i2c2_hwmod;
 static struct omap_hwmod am335x_usbss_hwmod;
+static struct omap_hwmod am335x_mmc0_hwmod;
+static struct omap_hwmod am335x_mmc1_hwmod;
+static struct omap_hwmod am335x_mmc2_hwmod;
 
 /*
  * Interconnects hwmod structures
@@ -996,65 +999,185 @@ static struct omap_hwmod am335x_mlb_hwmod = {
 };
 
 /* 'mmc' class */
-static struct omap_hwmod_class am335x_mmc_hwmod_class = {
+static struct omap_hwmod_class_sysconfig mmc_sysc = {
+	.rev_offs	= 0x1fc,
+	.sysc_offs	= 0x10,
+	.syss_offs	= 0x14,
+	.sysc_flags	= (SYSC_HAS_CLOCKACTIVITY | SYSC_HAS_SIDLEMODE |
+			   SYSC_HAS_ENAWAKEUP | SYSC_HAS_SOFTRESET |
+			   SYSC_HAS_AUTOIDLE | SYSS_HAS_RESET_STATUS),
+	.idlemodes	= (SIDLE_FORCE | SIDLE_NO | SIDLE_SMART),
+	.sysc_fields    = &omap_hwmod_sysc_type1,
+};
+
+static struct omap_hwmod_class mmc_class = {
 	.name = "mmc",
+	.sysc	= &mmc_sysc,
 };
 
 /* mmc0 */
 static struct omap_hwmod_irq_info am335x_mmc0_irqs[] = {
-	{ .irq = 64 },
+	{ .irq = AM335X_IRQ_MMCHS0 },
 	{ .irq = -1 }
 };
 
+static struct omap_hwmod_dma_info mmc0_edma_reqs[] = {
+	{ .name = "tx",	.dma_req = AM335X_DMA_MMCHS0_W, },
+	{ .name = "rx",	.dma_req = AM335X_DMA_MMCHS0_R, },
+	{ .dma_req = -1 }
+};
+
+static struct omap_hwmod_addr_space am335x_mmc0_addr_space[] = {
+	{
+		.pa_start	= AM335X_MMC0_BASE,
+		.pa_end		= AM335X_MMC0_BASE + SZ_4K - 1,
+		.flags		= ADDR_MAP_ON_INIT | ADDR_TYPE_RT,
+	},
+};
+
+static struct omap_hwmod_ocp_if am335x_l4ls__mmc0 = {
+	.master		= &am335x_l4ls_hwmod,
+	.slave		= &am335x_mmc0_hwmod,
+	.clk		= "mmc0_ick",
+	.addr		= am335x_mmc0_addr_space,
+	.user		= OCP_USER_MPU,
+};
+
+static struct omap_hwmod_ocp_if *am335x_mmc0_slaves[] = {
+	&am335x_l4ls__mmc0,
+};
+
+static struct omap_mmc_dev_attr mmc0_dev_attr = {
+	.flags = OMAP_HSMMC_SUPPORTS_DUAL_VOLT,
+};
+
 static struct omap_hwmod am335x_mmc0_hwmod = {
-	.name		= "mmc0",
-	.class		= &am335x_mmc_hwmod_class,
+	.name		= "mmc1",
+	.class		= &mmc_class,
 	.mpu_irqs       = am335x_mmc0_irqs,
-	.main_clk	= "mmc_clk",
+	.sdma_reqs	= mmc0_edma_reqs,
+	.main_clk	= "mmc0_fck",
+	.clkdm_name	= "l4ls_clkdm",
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_MMC0_CLKCTRL_OFFSET,
 			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
+	.dev_attr	= &mmc0_dev_attr,
+	.slaves		= am335x_mmc0_slaves,
+	.slaves_cnt	= ARRAY_SIZE(am335x_mmc0_slaves),
+	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
 };
 
 /* mmc1 */
 static struct omap_hwmod_irq_info am335x_mmc1_irqs[] = {
-	{ .irq = 28 },
+	{ .irq = AM335X_IRQ_MMCHS1 },
 	{ .irq = -1 }
 };
 
+static struct omap_hwmod_dma_info mmc1_edma_reqs[] = {
+	{ .name = "tx",	.dma_req = AM335X_DMA_MMCHS1_W, },
+	{ .name = "rx",	.dma_req = AM335X_DMA_MMCHS1_R, },
+	{ .dma_req = -1 }
+};
+
+static struct omap_hwmod_addr_space am335x_mmc1_addr_space[] = {
+	{
+		.pa_start	= AM335X_MMC1_BASE,
+		.pa_end		= AM335X_MMC1_BASE + SZ_4K - 1,
+		.flags		= ADDR_MAP_ON_INIT | ADDR_TYPE_RT,
+	},
+};
+
+static struct omap_hwmod_ocp_if am335x_l4ls__mmc1 = {
+	.master		= &am335x_l4ls_hwmod,
+	.slave		= &am335x_mmc1_hwmod,
+	.clk		= "mmc1_ick",
+	.addr		= am335x_mmc1_addr_space,
+	.user		= OCP_USER_MPU,
+};
+
+static struct omap_hwmod_ocp_if *am335x_mmc1_slaves[] = {
+	&am335x_l4ls__mmc1,
+};
+
+static struct omap_mmc_dev_attr mmc1_dev_attr = {
+	.flags = OMAP_HSMMC_SUPPORTS_DUAL_VOLT,
+};
+
 static struct omap_hwmod am335x_mmc1_hwmod = {
-	.name		= "mmc1",
-	.class		= &am335x_mmc_hwmod_class,
+	.name		= "mmc2",
+	.class		= &mmc_class,
 	.mpu_irqs       = am335x_mmc1_irqs,
-	.main_clk	= "mmc_clk",
+	.sdma_reqs	= mmc1_edma_reqs,
+	.main_clk	= "mmc1_fck",
+	.clkdm_name	= "l4ls_clkdm",
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_MMC1_CLKCTRL_OFFSET,
 			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
+	.dev_attr	= &mmc1_dev_attr,
+	.slaves		= am335x_mmc1_slaves,
+	.slaves_cnt	= ARRAY_SIZE(am335x_mmc1_slaves),
+	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
 };
 
 /* mmc2 */
 static struct omap_hwmod_irq_info am335x_mmc2_irqs[] = {
-	{ .irq = 29 },
+	{ .irq = AM335X_IRQ_MMCHS2 },
 	{ .irq = -1 }
 };
 
+static struct omap_hwmod_dma_info mmc2_edma_reqs[] = {
+	{ .name = "tx",	.dma_req = AM335X_DMA_MMCHS2_W, },
+	{ .name = "rx",	.dma_req = AM335X_DMA_MMCHS2_R, },
+	{ .dma_req = -1 }
+};
+
+static struct omap_hwmod_addr_space am335x_mmc2_addr_space[] = {
+	{
+		.pa_start	= AM335X_MMC2_BASE,
+		.pa_end		= AM335X_MMC2_BASE + SZ_64K - 1,
+		.flags		= ADDR_MAP_ON_INIT | ADDR_TYPE_RT,
+	},
+};
+
+static struct omap_hwmod_ocp_if am335x_l3_main__mmc2 = {
+	.master		= &am335x_l3_main_hwmod,
+	.slave		= &am335x_mmc2_hwmod,
+	.clk		= "mmc2_ick",
+	.addr		= am335x_mmc2_addr_space,
+	.user		= OCP_USER_MPU,
+};
+
+static struct omap_hwmod_ocp_if *am335x_mmc2_slaves[] = {
+	&am335x_l3_main__mmc2,
+};
+
+static struct omap_mmc_dev_attr mmc2_dev_attr = {
+	.flags = OMAP_HSMMC_SUPPORTS_DUAL_VOLT,
+};
+
 static struct omap_hwmod am335x_mmc2_hwmod = {
-	.name		= "mmc2",
-	.class		= &am335x_mmc_hwmod_class,
+	.name		= "mmc3",
+	.class		= &mmc_class,
 	.mpu_irqs       = am335x_mmc2_irqs,
-	.main_clk	= "mmc_clk",
+	.sdma_reqs	= mmc2_edma_reqs,
+	.main_clk	= "mmc2_fck",
+	.clkdm_name	= "l3s_clkdm",
 	.prcm = {
 		.omap4 = {
 			.clkctrl_offs = AM335X_CM_PER_MMC2_CLKCTRL_OFFSET,
 			.modulemode	= MODULEMODE_SWCTRL,
 		},
 	},
+	.dev_attr	= &mmc2_dev_attr,
+	.slaves		= am335x_mmc2_slaves,
+	.slaves_cnt	= ARRAY_SIZE(am335x_mmc2_slaves),
+	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
 };
 
 /* Master interfaces on the MPU interconnect */
