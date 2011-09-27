@@ -79,7 +79,7 @@
 #define CLKD_SHIFT		6
 #define DTO_MASK		0x000F0000
 #define DTO_SHIFT		16
-#define INT_EN_MASK		0x307F0033
+#define INT_EN_MASK		0x307F00f3
 #define BWR_ENABLE		(1 << 4)
 #define BRR_ENABLE		(1 << 5)
 #define DTO_ENABLE		(1 << 20)
