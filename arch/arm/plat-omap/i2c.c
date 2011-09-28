@@ -139,7 +139,8 @@ static inline int omap2_i2c_add_bus(int bus_id)
 	char oh_name[MAX_OMAP_I2C_HWMOD_NAME_LEN];
 	struct omap_i2c_bus_platform_data *pdata;
 
-	omap2_i2c_mux_pins(bus_id);
+	if (!cpu_is_am335x())
+		omap2_i2c_mux_pins(bus_id);
 
 	l = snprintf(oh_name, MAX_OMAP_I2C_HWMOD_NAME_LEN, "i2c%d", bus_id);
 	WARN(l >= MAX_OMAP_I2C_HWMOD_NAME_LEN,
