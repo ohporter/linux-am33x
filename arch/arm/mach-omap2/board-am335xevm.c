@@ -652,33 +652,33 @@ static struct mtd_partition am335x_nand_partitions[] = {
 	{
 		.name           = "U-Boot-min",
 		.offset         = 0,                    /* Offset = 0x0 */
-		.size           = SZ_128K,
+		.size           = 4*SZ_128K,
 		.mask_flags     = MTD_WRITEABLE,        /* force read-only */
 	},
 	{
 		.name           = "U-Boot",
-		.offset         = MTDPART_OFS_APPEND,   /* Offset = 0x128K */
+		.offset         = MTDPART_OFS_APPEND,   /* Offset = 0x8000 */
 		.size           = 18 * SZ_128K,
 		.mask_flags     = MTD_WRITEABLE,        /* force read-only */
 	},
 	{
 		.name           = "U-Boot Env",
-		.offset         = MTDPART_OFS_APPEND,   /* Offset = 0x260000 */
+		.offset         = MTDPART_OFS_APPEND,   /* Offset = 0x2c0000 */
 		.size           = 1 * SZ_128K,
 	},
 	{
 		.name           = "Kernel",
-		.offset         = MTDPART_OFS_APPEND,   /* Offset = 0x280000 */
+		.offset         = MTDPART_OFS_APPEND,   /* Offset = 0x2E0000 */
 		.size           = 34 * SZ_128K,
 	},
 	{
 		.name           = "File System",
-		.offset         = MTDPART_OFS_APPEND,   /* Offset = 0x6C0000 */
+		.offset         = MTDPART_OFS_APPEND,   /* Offset = 0x720000 */
 		.size           = 1601 * SZ_128K,
 	},
 	{
 		.name           = "Reserved",
-		.offset         = MTDPART_OFS_APPEND,   /* Offset = 0xCEE0000 */
+		.offset         = MTDPART_OFS_APPEND,   /* Offset = 0xCf40000 */
 		.size           = MTDPART_SIZ_FULL,
 	},
 };
