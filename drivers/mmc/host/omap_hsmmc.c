@@ -250,14 +250,10 @@ static int omap_hsmmc_get_wp(struct device *dev, int slot)
 		/* NOTE: assumes write protect signal is active-high */
 		return gpio_get_value_cansleep(mmc->slots[0].gpio_wp);
 	else {
-#if 0
 		pstate = 0;
 		pstate = OMAP_HSMMC_READ(host->base, PSTATE);
 		pstate &= PSTATE_WP_MASK;
 		return !(pstate >> PSTATE_WP_SHIFT);
-#endif
-		udelay(100);
-		return 0;
 	}
 }
 
