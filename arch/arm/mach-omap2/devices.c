@@ -1228,6 +1228,8 @@ void am335x_cpsw_init(void)
 			am335x_cpsw_slaves[1].mac_addr[i] = am335x_macid1[i];
 	}
 
+	memcpy(am335x_cpsw_pdata.mac_addr, am335x_cpsw_slaves[0].mac_addr,
+		ETH_ALEN);
 	platform_device_register(&am335x_cpsw_mdiodevice);
 	platform_device_register(&am335x_cpsw_device);
 	clk_add_alias(NULL, dev_name(&am335x_cpsw_mdiodevice.dev),
