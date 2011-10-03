@@ -90,6 +90,10 @@
 #define MSBS			(1 << 5)
 #define BCE			(1 << 1)
 #define FOUR_BIT		(1 << 1)
+#define DVAL_MASK		(3 << 9)
+#define DVAL_MAX		(3 << 9)	/* 8.4 ms debounce period */
+#define WPP_MASK		(1 << 8)
+#define WPP_ACT_LOW		(1 << 8)	/* WPP is Active Low */
 #define DW8			(1 << 5)
 #define CC			0x1
 #define TC			0x02
@@ -1763,6 +1767,8 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 {
 	struct omap_hsmmc_host *host = mmc_priv(mmc);
 	int do_send_init_stream = 0;
+	struct omap_mmc_platform_data *pdata = host->pdata;
+	u32 regVal;
 
 	pm_runtime_get_sync(host->dev);
 
@@ -1786,6 +1792,18 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 	}
 
 	/* FIXME: set registers based only on changes to ios */
+
+	if (pdata->version == MMC_CTRL_VERSION_2) {
+		/*
+		* Set
+		*	Debounce filter value to max
+		*	Write protect polarity to Active low level
+		*/
+		regVal = OMAP_HSMMC_READ(host->base, CON);
+		regVal &= ~(DVAL_MASK | WPP_MASK);
+		regVal |= (DVAL_MAX | WPP_ACT_LOW);
+		OMAP_HSMMC_WRITE(host->base, CON, regVal);
+	}
 
 	omap_hsmmc_set_bus_width(host);
 
