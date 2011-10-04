@@ -1970,6 +1970,7 @@ static struct omap_hwmod am335x_uart2_hwmod = {
 	.class		= &uart_class,
 	.mpu_irqs       = am335x_uart2_irqs,
 	.main_clk	= "uart2_fck",
+	.clkdm_name	= "l4ls_clkdm",
 	.sdma_reqs	= uart1_edma_reqs,
 	.prcm = {
 		.omap4 = {
@@ -1979,6 +1980,7 @@ static struct omap_hwmod am335x_uart2_hwmod = {
 	},
 	.slaves		= am335x_uart2_slaves,
 	.slaves_cnt	= ARRAY_SIZE(am335x_uart2_slaves),
+	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_AM335X),
 };
 
 /* uart3 */
