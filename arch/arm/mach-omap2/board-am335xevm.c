@@ -49,6 +49,7 @@
 
 /* LCD controller is similar to DA850 */
 #include <video/da8xx-fb.h>
+#include <video/st7735fb.h>
 
 #include "board-flash.h"
 #include "mux.h"
@@ -916,6 +917,23 @@ static struct spi_board_info am335x_spi1_slave_info[] = {
 	},
 };
 
+static const struct st7735fb_platform_data bone_st7735fb_data = {
+	.rst_gpio	= GPIO_TO_PIN(3, 19),
+	.dc_gpio	= GPIO_TO_PIN(3, 21),
+};
+
+static struct spi_board_info bone_spi1_slave_info[] = {
+	{
+		.modalias      = "adafruit_tft18",
+		.platform_data	= &bone_st7735fb_data,
+		.irq           = -1,
+		.max_speed_hz  = 8000000,
+		.bus_num       = 2,
+		.chip_select   = 0,
+		.mode          = SPI_MODE_3,
+	},
+};
+
 static void evm_nand_init(int evm_id, int profile)
 {
 	setup_pin_mux(nand_pin_mux);
@@ -1090,6 +1108,14 @@ static void spi1_init(int evm_id, int profile)
 	return;
 }
 
+/* setup bone spi1 */
+static void bone_spi1_init(int evm_id, int profile)
+{
+	setup_pin_mux(spi1_pin_mux);
+	spi_register_board_info(bone_spi1_slave_info,
+			ARRAY_SIZE(bone_spi1_slave_info));
+	return;
+}
 
 static int beaglebone_phy_fixup(struct phy_device *phydev)
 {
@@ -1230,6 +1256,8 @@ static struct evm_dev_cfg beaglebone_dev_cfg[] = {
 	{usb0_init,	DEV_ON_BASEBOARD, PROFILE_NONE},
 	{usb1_init,	DEV_ON_BASEBOARD, PROFILE_NONE},
 	{mmc0_init,	DEV_ON_BASEBOARD, PROFILE_NONE},
+	/* HACK ALERT */
+	{bone_spi1_init, DEV_ON_BASEBOARD, PROFILE_NONE},
 	{NULL, 0, 0},
 };
 
