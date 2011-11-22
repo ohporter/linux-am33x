@@ -244,7 +244,14 @@ static void st7735fb_update_display(struct st7735fb_par *par)
 {
 	int ret = 0;
 	u8 *vmem = par->info->screen_base;
+#ifdef __LITTLE_ENDIAN
+	int i;
+	u16 *vmem16 = (u16 *)vmem;
+	u16 *ssbuf = par->ssbuf;
 
+	for (i=0; i<WIDTH*HEIGHT*BPP/8/2; i++)
+		ssbuf[i] = swab16(vmem16[i]);
+#endif
 	/*
 		TODO:
 		Allow a subset of pages to be passed in
@@ -261,7 +268,11 @@ static void st7735fb_update_display(struct st7735fb_par *par)
 	st7735_write_cmd(par, ST7735_RAMWR);
 
 	/* Blast framebuffer to ST7735 internal display RAM */
+#ifdef __LITTLE_ENDIAN
+	ret = st7735_write_data_buf(par, (u8 *)ssbuf, WIDTH*HEIGHT*BPP/8);
+#else
 	ret = st7735_write_data_buf(par, vmem, WIDTH*HEIGHT*BPP/8);
+#endif
 	if (ret < 0)
 		pr_err("%s: spi_write failed to update display buffer\n",
 			par->info->fix.id);
@@ -417,12 +428,7 @@ static int __devinit st7735fb_probe (struct spi_device *spi)
 	info->var.blue.length = 5;
 	info->var.transp.offset = 0;
 	info->var.transp.length = 0;
-	info->flags = FBINFO_FLAG_DEFAULT |
-#ifdef __LITTLE_ENDIAN
-			FBINFO_FOREIGN_ENDIAN |
-#endif
-			FBINFO_VIRTFB;
-
+	info->flags = FBINFO_FLAG_DEFAULT | FBINFO_VIRTFB;
 	info->fbdefio = &st7735fb_defio;
 	fb_deferred_io_init(info);
 
@@ -431,6 +437,14 @@ static int __devinit st7735fb_probe (struct spi_device *spi)
 	par->spi = spi;
 	par->rst = pdata->rst_gpio;
 	par->dc = pdata->dc_gpio;
+
+#ifdef __LITTLE_ENDIAN
+	/* Allocate swapped shadow buffer */
+	vmem = vzalloc(vmem_size);
+	if (!vmem)
+		return retval;
+	par->ssbuf = vmem;
+#endif
 
 	retval = register_framebuffer(info);
 	if (retval < 0)
